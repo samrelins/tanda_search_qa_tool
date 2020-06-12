@@ -22,7 +22,7 @@ def get_json(filename):
 def make_alpha(text):
     chars = [char for char in text if char.isalpha() or char in [' ', '\n']]
     string =  "".join(chars).lower()
-    return re.sub("\s{2,}|\n", " ", string)
+    return re.sub(r"\s{2,}|\n", " ", string)
 
 
 def get_paper_text(cord_uid, meta):
@@ -111,7 +111,7 @@ def extract_text_features(paper_text):
         if is_counter:
             continue
         
-        if re.sub(",|\.", "", ent.text).isnumeric() or ent.label_ is "CARDINAL":
+        if re.sub(r",|\.", "", ent.text).isnumeric() or ent.label_ is "CARDINAL":
             
             if ent.text[:2] in ["19", "20"] and ent.label_ is "DATE":
                 results["cardinals"].append(ent.text)
@@ -182,49 +182,49 @@ def extract_text_features(paper_text):
 
 
 study_design_keywords = {
-    "meta\W?analysis": 'systematic review and metaanalysis',
-    "systematic\W(literature)?review": 'systematic review and metaanalysis',
-    "literature review": 'systematic review and metaanalysis',
-    "scoping\Wreview": 'systematic review and metaanalysis',
-    "case\Wseries": 'case series',
-    "cross\Wsectional": "crosssectional study",
-    "retrospective\W.{,20}cohort": 'retrospective observational study',
-    "longitudinal\W.{,20}cohort": 'retrospective observational study',
-    "retrospective\W.{,20}stud[iy]": 'retrospective observational study',
-    "retrospective\W.{,20}review": 'retrospective observational study',
-    "retrospective\W.{,20}analysis": 'retrospective observational study',
-    "prospective\W.{,20}cohort": 'prospective observational study',
-    "prospective\W.{,20}stud[iy]": 'prospective observational study',
-    "prospective\W.{,20}review": 'prospective observational study',
-    "prospective\W.{,20}analysis": 'prospective observational study',
-    "simulat(e|ion)": 'simulation',
-    "modell?ing": 'simulation',
-    "model\Wbased": 'simulation',
-    "mathematical model": "simulation",
-    "machine\Wlearning": "simulation",
+    r"meta\W?analysis": 'systematic review and metaanalysis',
+    r"systematic\W(literature)?review": 'systematic review and metaanalysis',
+    r"literature review": 'systematic review and metaanalysis',
+    r"scoping\Wreview": 'systematic review and metaanalysis',
+    r"case\Wseries": 'case series',
+    r"cross\Wsectional": "crosssectional study",
+    r"retrospective\W.{,20}cohort": 'retrospective observational study',
+    r"longitudinal\W.{,20}cohort": 'retrospective observational study',
+    r"retrospective\W.{,20}stud[iy]": 'retrospective observational study',
+    r"retrospective\W.{,20}review": 'retrospective observational study',
+    r"retrospective\W.{,20}analysis": 'retrospective observational study',
+    r"prospective\W.{,20}cohort": 'prospective observational study',
+    r"prospective\W.{,20}stud[iy]": 'prospective observational study',
+    r"prospective\W.{,20}review": 'prospective observational study',
+    r"prospective\W.{,20}analysis": 'prospective observational study',
+    r"simulat(e|ion)": 'simulation',
+    r"modell?ing": 'simulation',
+    r"model\Wbased": 'simulation',
+    r"mathematical model": "simulation",
+    r"machine\Wlearning": "simulation",
 }
 
 study_design_regexs = [
-    "this (?!.{{,100}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
-    "our (?!.{{,100}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
-    "the present .{{,100}}{study_design}",
-    "we( have)? conduct(ed)? .{{,200}}{study_design}",
-    "we( have)? perform(ed)? .{{,200}}{study_design}",
-    "we( have)? implement(ed)? .{{,200}}{study_design}",
-    "we( have)? appl(y|ied) .{{,200}}{study_design}",
-    "we( have)? use[\sd] .{{,200}}{study_design}",
-    "{study_design}.{{,200}} was conducted",
-    "{study_design}.{{,200}} was performed",
-    "{study_design}.{{,200}} was implemented",
-    "{study_design}.{{,200}} was applied",
-    "{study_design}.{{,200}} was used",
-    "we present .{{,100}}{study_design}",
-    "we estimated .{{,200}}{study_design}",
-    "we confirmed (?!.{{,200}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
-    "we tested (?!.{{,200}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
-    "based on .{{,100}}{study_design}",
-    "design\W .{{,100}}{study_design}",
-    "method[s\W].{{,100}}{study_design}"
+    r"this (?!.{{,100}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
+    r"our (?!.{{,100}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
+    r"the present .{{,100}}{study_design}",
+    r"we( have)? conduct(ed)? .{{,200}}{study_design}",
+    r"we( have)? perform(ed)? .{{,200}}{study_design}",
+    r"we( have)? implement(ed)? .{{,200}}{study_design}",
+    r"we( have)? appl(y|ied) .{{,200}}{study_design}",
+    r"we( have)? use[\sd] .{{,200}}{study_design}",
+    r"{study_design}.{{,200}} was conducted",
+    r"{study_design}.{{,200}} was performed",
+    r"{study_design}.{{,200}} was implemented",
+    r"{study_design}.{{,200}} was applied",
+    r"{study_design}.{{,200}} was used",
+    r"we present .{{,100}}{study_design}",
+    r"we estimated .{{,200}}{study_design}",
+    r"we confirmed (?!.{{,200}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
+    r"we tested (?!.{{,200}} a )(?!.{{,100}} existing )(?!.{{,100}} other ).{{,100}}{study_design}",
+    r"based on .{{,100}}{study_design}",
+    r"design\W .{{,100}}{study_design}",
+    r"method[s\W].{{,100}}{study_design}"
 ]
 
 design_keyword_lists = {}
@@ -236,22 +236,24 @@ for keyword, study_design in study_design_keywords.items():
 
         
 def count_study_design_mentions(paper_text):
-    results = []
+
+    results = {}
+    for study_design in design_keyword_lists.keys():
+        results[study_design] = 0
+
     for study_design, keyword_list in design_keyword_lists.items():
-        total_hits = 0
         for keyword in keyword_list:
             keyword_re = [design_re.format(study_design=keyword)
                           for design_re in study_design_regexs]
             keyword_p = re.compile("|".join(keyword_re))
-            total_hits += len([hit for hit in keyword_p.finditer(paper_text)])
-        results.append(total_hits)
-    return tuple(results)
+            results[study_design] += len([hit for hit in keyword_p.finditer(paper_text)])
+    return results
 
 
 stats_regexs = [
-    "\Wci\W", "p\s?<", "n\s?=", "p\s?=", "\Wiqr\W", "interquartile",
-    "standard deviation", "\Wsd\W", "median", "p\Wvalue", "pearson", 
-    "±", "≥", "≦", "≤", "χ"
+    r"\Wci\W", r"p\s?<", r"n\s?=", r"p\s?=", r"\Wiqr\W", r"interquartile",
+    r"standard rdeviation", r"\Wsd\W", r"median", r"p\Wvalue", r"pearson", 
+    r"±", r"≥", r"≦", r"≤", r"χ"
 ]
 
 
@@ -261,21 +263,21 @@ def count_statistical_features(text):
 
 
 title_keywords = {
-    "meta\W?analysis": 'systematic review and metaanalysis',
-    "systematic\W(literature)?review": 'systematic review and metaanalysis',
-    "literature review": 'systematic review and metaanalysis',
-    "scoping\Wreview": 'systematic review and metaanalysis',
-    "simulat(e|ion)": 'simulation',
-    "modell?ing": 'simulation',
-    "model\Wbased": 'simulation',
-    "mathematical model": "simulation",
-    "machine\Wlearning": "simulation",
-    "case\Wseries": 'case series',
-    "cross\Wsectional": "crosssectional study",
-    "retrospective cohort": 'retrospective observational study',
-    "retrospective .{,20}stud[iy]": 'retrospective observational study',
-    "regression": "ecological regression",
-    "least squares": "ecological regression",
+    r"meta\W?analysis": 'systematic review and metaanalysis',
+    r"systematic\W(literature)?review": 'systematic review and metaanalysis',
+    r"literature review": 'systematic review and metaanalysis',
+    r"scoping\Wreview": 'systematic review and metaanalysis',
+    r"simulat(e|ion)": 'simulation',
+    r"modell?ing": 'simulation',
+    r"model\Wbased": 'simulation',
+    r"mathematical model": "simulation",
+    r"machine\Wlearning": "simulation",
+    r"case\Wseries": 'case series',
+    r"cross\Wsectional": "crosssectional study",
+    r"retrospective cohort": 'retrospective observational study',
+    r"retrospective .{,20}stud[iy]": 'retrospective observational study',
+    r"regression": "ecological regression",
+    r"least squares": "ecological regression",
 }
 
 
@@ -298,32 +300,33 @@ model_p = re.compile("|".join(model_regexs))
 
 def assign_type_from_text(paper_text):
 
-    text_types = np.array(find_study_designs_in_text(paper_text))
+    study_design_mentions = count_study_design_mentions(paper_text)
     
-    if (text_types > 0).sum() == 1:
-        return design_types[text_types > 0][0]
-    elif text_types[np.where(design_types == "systematic review and metaanalysis")]:
+    # if there's only one type of study design mentioned in the text
+    if (np.array(study_design_mentions.values()) > 0).sum() == 1:
+        return [design for count, design in study_design_mentions if count > 0][0]
+    elif study_design_mentions["systematic review and metaanalysis"]:
         return "systematic review and metaanalysis"
-    elif text_types[np.where(design_types == "prospective observational study")]:
+    elif study_design_mentions["prospective observational study"]:
         return "prospective observational study"
-    elif text_types[np.where(design_types == "retrospective observational study")]:
+    elif study_design_mentions["retrospective observational study"]:
         return "retrospective observational study"
-    elif (text_types > 2).sum():
-        return design_types[np.array(text_types).argmax()]
-    elif (text_types > 0).sum():
-        return design_types[np.array(text_types).argmax()]
+    elif (np.array(study_design_mentions.values()) > 2).sum():
+        return [design for count, design in study_design_mentions if count > 2][0]
+    if (np.array(study_design_mentions.values()) > 0).sum():
+        return [design for count, design in study_design_mentions if count > 0][0]
                           
     modelling_mentions = len([match for match in model_p.finditer(paper_text)])
     if modelling_mentions > 5:
         return "simulation"
         
-    stats_mentions = has_statistical_analysis(paper_text)
-    follow_up = True if re.search("follow(ing|ed)?\Wup", paper_text) else False
+    stats_mentions = count_statistical_features(paper_text)
+    follow_up = True if re.search(r"follow(ing|ed)?\Wup", paper_text) else False
     
-    method_p = re.compile("\n\n.{,100}method.{,100}\n\n")
+    method_p = re.compile(r"\n\n.{,100}method.{,100}\n\n")
     methods_section = True if method_p.search(paper_text) else False
 
-    results_p = re.compile("\n\n.{,100}result.{,100}\n\n")
+    results_p = re.compile(r"\n\n.{,100}result.{,100}\n\n")
     results_section = True if results_p.search(paper_text) else False
                           
     if (stats_mentions and follow_up) or (follow_up and results_section and methods_section):
@@ -362,7 +365,7 @@ def get_evidence_measures(text):
             results += f"{noun}: {quantities_dict[noun]}, "
     
     locations = []
-    for gpe, mentions in Counter(features["gpes"]).most_common():
+    for gpe, _ in Counter(features["gpes"]).most_common():
         locations.append(gpe.title())
     if locations:
         results += f"Locations: {', '.join(locations)}"
