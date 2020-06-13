@@ -191,8 +191,9 @@ class TextSearchQATool:
             output_ids = []
             containing_p = re.compile("|".join(containing))
             for text_id in search_texts_ids:
-                no_hits = containing_p.finditer(self.texts[text_id].lower())
-                if no_hits > containing_threshold:
+                text = self.texts[text_id].lower()
+                n_hits = len([hit for hit in containing_p.finditer(text)])
+                if n_hits > containing_threshold:
                     output_ids.append(text_id)
         if not_containing:
             not_containing_p = re.compile("|".join(not_containing))

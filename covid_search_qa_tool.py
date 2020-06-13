@@ -186,15 +186,19 @@ class CovidSearchQATool(TextSearchQATool):
     
         return sentence_tuples
 
+    
+    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing, 
+                             containing_threshold):
 
-    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing):
         output_ids = search_texts_ids
         if containing:
+            output_ids = []
             containing_p = re.compile("|".join(containing))
-            output_ids = (
-                [text_id for text_id in output_ids
-                 if containing_p.search(self.texts[text_id].text().lower())]
-            )
+            for text_id in search_texts_ids:
+                text = self.texts[text_id].text().lower()
+                n_hits = len([hit for hit in containing_p.finditer(text)])
+                if n_hits > containing_threshold:
+                    output_ids.append(text_id)
         if not_containing:
             not_containing_p = re.compile("|".join(not_containing))
             output_ids = (
@@ -204,7 +208,7 @@ class CovidSearchQATool(TextSearchQATool):
 
         return output_ids
 
-    
+
     def find_missing_abstracts(self, search_name):
         s2_api_address = "https://api.semanticscholar.org/v1/paper/CorpusID:{s2_id}"
         added_abstracts = 0
