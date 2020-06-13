@@ -5,8 +5,10 @@ import numpy as np
 import pandas as pd
 import sys
 
-def add_missing_abstracts(meta):
+def add_missing_abstracts(data_dir):
 
+    meta = pd.read_csv(data_dir + "metadata.csv")
+    meta = meta.dropna(subset=["title"])
 
     covid_regexs = [ '2019[-\\s‐]?n[-\\s‐]?cov',
                     "novel coronavirus.*2019", 
@@ -93,7 +95,5 @@ if __name__ == "__main__":
     elif not os.path.exists(data_dir):
         raise TypeError(f"Enter a valid directory. None found at {sys.argv[1]}")
 
-    meta = pd.read_csv(data_dir + "metadata.csv")
-    meta = meta.dropna(subset=["title"])
-    add_missing_abstracts(meta)
+    meta = add_missing_abstracts(data_dir)
     meta.to_csv(data_dir + "metadata_processed.csv", index=False)

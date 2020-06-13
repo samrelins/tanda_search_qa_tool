@@ -175,5 +175,5 @@ if __name__ == "__main__":
     elif not os.path.exists(data_dir):
         raise TypeError(f"Enter a valid directory. None found at {sys.argv[1]}")
 
-    cord_summaries = build_summaries_df(sys.argv[1])
+    cord_summaries = build_summaries_df(data_dir)
     cord_summaries.to_csv(f"{data_dir}summaries_processed.csv", index=False)
