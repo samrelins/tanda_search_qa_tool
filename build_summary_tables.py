@@ -14,8 +14,8 @@ def disp(html):
     display(HTML(html))
 
 
-def get_json(filename):
-    with open("data/" + filename, 'r') as fp:
+def get_json(filepath):
+    with open(filepath, 'r') as fp:
         return json.load(fp) 
 
 
@@ -25,19 +25,19 @@ def make_alpha(text):
     return re.sub(r"\s{2,}|\n", " ", string)
 
 
-def get_paper_text(cord_uid, meta):
+def get_paper_text(cord_uid, meta, data_dir):
     
     # find entry and collect json text files
     meta_entry = meta[meta.cord_uid == cord_uid].iloc[0]
     json_results = []
     if not pd.isna(meta_entry.pmc_json_files):
-        json_results.append(get_json(meta_entry.pmc_json_files))
+        json_results.append(get_json(data_dir + meta_entry.pmc_json_files))
     if not pd.isna(meta_entry.pdf_json_files):
         if ';' in meta_entry.pdf_json_files:
             for json_file in meta_entry.pdf_json_files.split(';'):
-                json_results.append(get_json(json_file.strip()))
+                json_results.append(get_json(data_dir + json_file.strip()))
         else:
-            json_results.append(get_json(meta_entry.pdf_json_files))
+            json_results.append(get_json(data_dir + meta_entry.pdf_json_files))
             
     # loop through json text files and build paper text
     paper_text = ""
