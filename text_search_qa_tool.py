@@ -113,12 +113,14 @@ class TextSearchQATool:
             print(f"\tcontaining: {containing}")
         if not_containing:
             print(f"\tnot containing: {(not_containing)}")
+        print(f"above a threshold of {containing_threshold}")
         
         # call search function to return ids of required results
         search_results_ids = self._search_by_texts_ids(
             search_texts_ids = self.texts.keys(),
             containing=containing,
             not_containing=not_containing,
+            containing_threshold=containing_threshold
         )
 
         # store results in search result object
@@ -165,6 +167,7 @@ class TextSearchQATool:
             search_texts_ids = search.ids,
             containing=containing,
             not_containing=not_containing,
+            containing_threshold=containing_threshold
         )
 
         # store refined results
