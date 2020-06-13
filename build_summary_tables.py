@@ -301,9 +301,11 @@ model_p = re.compile("|".join(model_regexs))
 def assign_type_from_text(paper_text):
 
     study_design_mentions = count_study_design_mentions(paper_text)
-    
+    design_counts = np.array(
+        [n_mentions for n_mentions in study_design_mentions.values()]
+    )
     # if there's only one type of study design mentioned in the text
-    if (np.array(study_design_mentions.values()) > 0).sum() == 1:
+    if (design_counts > 0).sum() == 1:
         return [design for count, design in study_design_mentions if count > 0][0]
     elif study_design_mentions["systematic review and metaanalysis"]:
         return "systematic review and metaanalysis"
@@ -311,9 +313,9 @@ def assign_type_from_text(paper_text):
         return "prospective observational study"
     elif study_design_mentions["retrospective observational study"]:
         return "retrospective observational study"
-    elif (np.array(study_design_mentions.values()) > 2).sum():
+    elif (np.array(design_counts) > 2).sum():
         return [design for count, design in study_design_mentions if count > 2][0]
-    if (np.array(study_design_mentions.values()) > 0).sum():
+    if (np.array(design_counts) > 0).sum():
         return [design for count, design in study_design_mentions if count > 0][0]
                           
     modelling_mentions = len([match for match in model_p.finditer(paper_text)])
