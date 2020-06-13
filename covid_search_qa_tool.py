@@ -78,7 +78,8 @@ class CovidSearchQATool(TextSearchQATool):
 
         return texts_dict
 
-    def search(self, containing=[], not_containing=[], search_name=None):
+    def search(self, containing=[], not_containing=[], search_name=None,
+               containing_threshold=2):
         # find an unused search name if none entered
         if search_name is None:
             search_name = "search0"
@@ -89,7 +90,8 @@ class CovidSearchQATool(TextSearchQATool):
 
         super().search(containing=containing,
                        not_containing=not_containing,
-                       search_name=search_name)
+                       search_name=search_name,
+                       containing_threshold=containing_threshold)
 
         missing_abstracts = 0
         for text_id in self.search_results[search_name].ids:

@@ -84,7 +84,8 @@ class TextSearchQATool:
         self.search_results = {}
 
 
-    def search(self, containing=[], not_containing=[], search_name=None):
+    def search(self, containing=[], not_containing=[], search_name=None, 
+               containing_threshold=2):
 
         # check inputs are correct
         if not containing and not not_containing:
@@ -134,7 +135,8 @@ class TextSearchQATool:
             print(f"Search returned no results")
 
 
-    def refine_search(self, search_name, containing=[], not_containing=[]):
+    def refine_search(self, search_name, containing=[], not_containing=[], 
+                      containing_threshold=2):
 
         # check for correct input
         if search_name not in self.search_results.keys():
@@ -179,7 +181,7 @@ class TextSearchQATool:
 
 
     def _search_by_texts_ids(self, search_texts_ids, containing, not_containing, 
-                             containing_threshold=2):
+                             containing_threshold):
 
         output_ids = search_texts_ids
         if containing:
