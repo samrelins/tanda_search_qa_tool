@@ -178,19 +178,22 @@ class TextSearchQATool:
             print(f"Search returned no results")
 
 
-    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing):
+    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing, 
+                             containing_threshold=2):
+
         output_ids = search_texts_ids
         if containing:
-            containing_pattern = re.compile("|".join(containing))
-            output_ids = (
-                [text_id for text_id in output_ids
-                 if containing_pattern.search(self.texts[text_id].lower())]
-            )
+            output_ids = []
+            containing_p = re.compile("|".join(containing))
+            for text_id in search_texts_ids:
+                no_hits = containing_p.finditer(self.texts[text_id].lower())
+                if no_hits > containing_threshold:
+                    output_ids.append(text_id)
         if not_containing:
-            not_containing_pattern = re.compile("|".join(not_containing))
+            not_containing_p = re.compile("|".join(not_containing))
             output_ids = (
                 [text_id for text_id in output_ids
-                 if not not_containing_pattern.search(self.texts[text_id].lower())]
+                 if not not_containing_p.search(self.texts[text_id].lower())]
             )
 
         return output_ids
