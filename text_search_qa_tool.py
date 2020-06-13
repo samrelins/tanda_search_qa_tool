@@ -205,9 +205,12 @@ class TextSearchQATool:
         return output_ids
 
 
-    def return_answers(self, search_name, question, min_score=None, max_length=128):
+    def return_answers(self, question, search_name=None, min_score=None, max_length=128):
 
-        search_texts_ids = self.search_results[search_name].ids
+        if not search_name is None:
+            search_texts_ids = self.search_results[search_name].ids
+        else:
+            search_texts_ids = self.texts.keys()
 
         print('=' * 100)
         print(f"Checking {len(search_texts_ids)} search results for answers to {question}")
@@ -218,7 +221,7 @@ class TextSearchQATool:
                                                         search_texts)
         # create input examples with question and sentence (potential answer) pairs        
         input_examples = []
-        for idx, sentence_tuple in enumerate(sentence_tuples):
+        for sentence_tuple in sentence_tuples:
             text_id, sentence_no, sentence = sentence_tuple
             input_example = InputExample(
                 guid = str(text_id) + '_' + str(sentence_no),

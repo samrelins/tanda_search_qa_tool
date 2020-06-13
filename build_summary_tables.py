@@ -300,13 +300,20 @@ model_p = re.compile("|".join(model_regexs))
 
 def assign_type_from_text(paper_text):
 
+    if not len(paper_text):
+        return None
+
+    if re.search("letter to( the)? editor", paper_text):
+        return "editorial"
+
     study_design_mentions = count_study_design_mentions(paper_text)
     design_counts = np.array(
         [n_mentions for n_mentions in study_design_mentions.values()]
     )
     # if there's only one type of study design mentioned in the text
     if (design_counts > 0).sum() == 1:
-        return [design for count, design in study_design_mentions if count > 0][0]
+        return [design for design, count in study_design_mentions.items() 
+                if count > 0][0]
     elif study_design_mentions["systematic review and metaanalysis"]:
         return "systematic review and metaanalysis"
     elif study_design_mentions["prospective observational study"]:
@@ -314,9 +321,11 @@ def assign_type_from_text(paper_text):
     elif study_design_mentions["retrospective observational study"]:
         return "retrospective observational study"
     elif (np.array(design_counts) > 2).sum():
-        return [design for count, design in study_design_mentions if count > 2][0]
+        return [design for design, count in study_design_mentions.items() 
+                if count > 2][0]
     if (np.array(design_counts) > 0).sum():
-        return [design for count, design in study_design_mentions if count > 0][0]
+        return [design for design, count in study_design_mentions.items() 
+                if count > 0][0]
                           
     modelling_mentions = len([match for match in model_p.finditer(paper_text)])
     if modelling_mentions > 5:
@@ -340,7 +349,7 @@ def assign_type_from_text(paper_text):
     return "expert review"
     
 
-def get_evidence_measures(text):
+def get_strength_of_evidence(text):
     
     features = extract_text_features(text)
     
