@@ -5,12 +5,8 @@ import numpy as np
 import pandas as pd
 import sys
 
-def add_missing_abstracts(data_dir):
+def add_missing_abstracts(meta):
 
-    if not data_dir[-1] == "/":
-        data_dir += "/"
-    meta = pd.read_csv(data_dir + "metadata.csv")
-    meta = meta.dropna(subset=["title"])
 
     covid_regexs = [ '2019[-\\s‐]?n[-\\s‐]?cov',
                     "novel coronavirus.*2019", 
@@ -83,8 +79,7 @@ def add_missing_abstracts(data_dir):
     missing_end = sum(covid_related & no_abstract & has_json_files)    
     print(f"{missing_start - missing_end} abstracts added from json text")
 
-    meta.to_csv(data_dir + "metadata_processed.csv", index=False)
-    return 0
+    return meta
                     
 if __name__ == "__main__":
 
@@ -98,4 +93,7 @@ if __name__ == "__main__":
     elif not os.path.exists(data_dir):
         raise TypeError(f"Enter a valid directory. None found at {sys.argv[1]}")
 
-    add_missing_abstracts(sys.argv[1])
+    meta = pd.read_csv(data_dir + "metadata.csv")
+    meta = meta.dropna(subset=["title"])
+    add_missing_abstracts(meta)
+    meta.to_csv(data_dir + "metadata_processed.csv", index=False)

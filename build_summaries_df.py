@@ -161,8 +161,7 @@ def build_summaries_df(data_dir):
         lambda x: study_type_synonyms[x] if x in study_type_synonyms.keys() else "other"
     )
 
-    cord_summaries.to_csv(f"{data_dir}summaries_processed.csv", index=False)
-    return 0
+    return cord_summaries
 
 if __name__ == "__main__":
 
@@ -176,4 +175,5 @@ if __name__ == "__main__":
     elif not os.path.exists(data_dir):
         raise TypeError(f"Enter a valid directory. None found at {sys.argv[1]}")
 
-    build_summaries_df(sys.argv[1])
+    cord_summaries = build_summaries_df(sys.argv[1])
+    cord_summaries.to_csv(f"{data_dir}summaries_processed.csv", index=False)
