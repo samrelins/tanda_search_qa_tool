@@ -179,6 +179,42 @@ def extract_text_features(paper_text):
     results["plural_nouns"] = Counter(plural_nouns).most_common()
 
     return results
+    
+
+def get_strength_of_evidence(text):
+    
+    features = extract_text_features(text)
+    
+    all_quantity_nouns = [noun for _, noun in features["quantities"]]
+    most_common_nouns = Counter(all_quantity_nouns).most_common()
+    mul_ref_nouns = [noun for noun, references in most_common_nouns
+                     if references > 2]
+    quantities_dict = {}
+    for amount, noun in features["quantities"]:
+        if not amount.isnumeric() or not noun in mul_ref_nouns:
+            continue
+        if not noun in quantities_dict.keys():
+            if float(amount) > 9:
+                quantities_dict[noun] = amount
+        elif amount > quantities_dict[noun]:
+            quantities_dict[noun] = amount
+    
+    accepted_nouns = [noun for noun, mentions in features["plural_nouns"][:10]
+                      if mentions > 5]
+    
+    results = ""
+    for noun in quantities_dict.keys():
+        if noun in accepted_nouns:
+            results += f"{noun}: {quantities_dict[noun]}, "
+    
+    locations = []
+    for gpe, count in Counter(features["gpes"]).most_common():
+        if count > 2:
+            locations.append(gpe.title())
+    if locations:
+        results += f"Locations: {', '.join(locations)}"
+                       
+    return results
 
 
 study_design_keywords = {
@@ -348,41 +384,6 @@ def assign_type_from_text(paper_text):
     return "expert review"
     
 
-def get_strength_of_evidence(text):
-    
-    features = extract_text_features(text)
-    
-    all_quantity_nouns = [noun for _, noun in features["quantities"]]
-    most_common_nouns = Counter(all_quantity_nouns).most_common()
-    mul_ref_nouns = [noun for noun, references in most_common_nouns
-                     if references > 2]
-    quantities_dict = {}
-    for amount, noun in features["quantities"]:
-        if not amount.isnumeric() or not noun in mul_ref_nouns:
-            continue
-        if not noun in quantities_dict.keys():
-            if float(amount) > 9:
-                quantities_dict[noun] = amount
-        elif amount > quantities_dict[noun]:
-            quantities_dict[noun] = amount
-    
-    accepted_nouns = [noun for noun, mentions in features["plural_nouns"][:10]
-                      if mentions > 5]
-    
-    results = ""
-    for noun in quantities_dict.keys():
-        if noun in accepted_nouns:
-            results += f"{noun}: {quantities_dict[noun]}, "
-    
-    locations = []
-    for gpe, _ in Counter(features["gpes"]).most_common():
-        locations.append(gpe.title())
-    if locations:
-        results += f"Locations: {', '.join(locations)}"
-                       
-    return results
-    
-
 default_pop_keywords = {
     "Homeless": ["homeless", "underhoused"],
     "Substance Abusers": ["(substance|alcohol|drug|opioid) (use|abuse|depend)",
@@ -397,7 +398,7 @@ default_pop_keywords = {
 }
 
 
-def find_populations(text, pop_keywords, n_hits=5):
+def find_populations(text, pop_keywords, n_hits):
 
     population_hits ={}
     for population in pop_keywords.keys():

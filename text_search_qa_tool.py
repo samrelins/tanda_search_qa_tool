@@ -51,7 +51,7 @@ class SearchResult:
 
 
 class TextSearchQATool:
-    def __init__(self, texts, qa_model_dir, whoosh_index_dir=None):
+    def __init__(self, texts, qa_model_dir):
         print('=' * 100)
         print("Building Search tool")
         self.texts = texts
