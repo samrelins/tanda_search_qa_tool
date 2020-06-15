@@ -149,7 +149,7 @@ class CordSearchQATool(TextSearchQATool):
             paper = answer_df[paper_mask].sort_values("sentence_no")
             title = paper.iloc[0]
             if title.score > highlight_score:
-                html_output += ("<h3 style='color:yellow'>" 
+                html_output += ("<h3 style='color:orange'>" 
                                 + title.sentence.title() 
                                 + " - " 
                                 + title.cord_uid + "</h3><br>")
@@ -162,7 +162,7 @@ class CordSearchQATool(TextSearchQATool):
             html_output += "<p>"
             for entry in paper.iloc[1:].itertuples():
                 if entry.score > highlight_score:
-                    html_output += ("<strong style='color:yellow'>" 
+                    html_output += ("<strong style='color:orange'>" 
                                     + entry.sentence.capitalize() 
                                     + " .</strong>")
                 else:
