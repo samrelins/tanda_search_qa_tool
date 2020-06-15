@@ -396,7 +396,7 @@ default_pop_keywords = {
     "Economically Vulnerable": ["unemploy", "ineqaulit", "pover", 
                                 "hunger", "starv"],
     "Children": ["paed", "child", "infant", "baby", "toddler"],
-    "Healthcare Workers": ["(health(care)?|clinical) (worker|provider|staff|professional)", 
+    "Healthcare Workers": ["(health(\W?care)?|clinical|medical) (worker|provider|staff|team|professional)", 
                            "doctor", "nurse", "surgeon", "physician", "clinician"],
     "The Elderly": ["elderly", "old.{,10}(patient|people|person|men|adult|women)", "old age",
                     "geriatric", "pension", "retired", "age?ing", "frail"],
