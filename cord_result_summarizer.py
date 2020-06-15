@@ -59,8 +59,8 @@ class CordResultSummarizer:
 
 
     def summary_table(self, pop_keywords=default_pop_keywords, n_hits=5,
-                      challenge_question="what is the problem or challenge",
-                      solution_question="what is the solution or recommendation"):
+                      challenge_question="what is the problem issue challenge",
+                      solution_question="what action should be taken"):
 
         print(f"\nBuilding summary table from {len(self.abstracts.keys())} papers", flush=True)
         summary_table = {
