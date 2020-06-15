@@ -62,6 +62,8 @@ def add_missing_abstracts(data_dir):
                 
     no_abstract = meta.abstract.isna()
 
+    meta = meta[meta.cord_uid != "nwtwtfmr"]
+
     for entry in meta[covid_related & no_abstract & has_json_files].itertuples():
         if not pd.isna(entry.pdf_json_files):
             if ';' in entry.pdf_json_files:
