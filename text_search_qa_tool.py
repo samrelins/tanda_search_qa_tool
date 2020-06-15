@@ -328,7 +328,7 @@ class TextSearchQATool:
 
         answer_tuples = self.return_answers(search_name=search_name,
                                             question=question,
-                                            min_score=min_score,
+                                            min_score=None,
                                             max_length=max_length)
 
         answer_df = pd.DataFrame(answer_tuples, columns=["text_id",
@@ -359,7 +359,12 @@ class TextSearchQATool:
                     html_results += entry.sentence.capitalize() + ". "
             html_results += "</p><br>"
 
-        return answer_tuples, html_results
+        output_answer_tuples = []
+        for answer_tuple in answer_tuples:
+            if answer_tuple[3] > min_score:
+                output_answer_tuples.append(answer_tuple)
+
+        return output_answer_tuples, html_output
 
 
     def return_html_search_results(self, search_name, n_results=100):
