@@ -117,7 +117,7 @@ class CordSearchQATool(TextSearchQATool):
 
 
     def return_html_answers(self, search_name, question, min_score=None, 
-                            highlight_score=-2, top_n=100, max_length=128):
+                            highlight_score=-4, top_n=10, max_length=128):
 
         answer_tuples = self.return_answers(search_name=search_name,
                                             question=question,
@@ -141,7 +141,7 @@ class CordSearchQATool(TextSearchQATool):
         paper_scores["score"] = np.sum(paper_scores.iloc[:,1:], axis=1)
         paper_scores.sort_values("score", ascending=False, inplace=True)
 
-        html_output = f"<h1>Question: {question}</h1>"
+        html_output = f"<h1>Question: {question}</h1><br><br>"
         for idx, cord_uid in enumerate(paper_scores.cord_uid.values):
             if idx > top_n:
                 break
@@ -152,7 +152,7 @@ class CordSearchQATool(TextSearchQATool):
                 html_output += ("<h3 style='color:yellow'>" 
                                 + title.sentence.title() 
                                 + " - " 
-                                + title.cord_uid + "</h3>")
+                                + title.cord_uid + "</h3><br>")
             else:
                 html_output += ("<h3>" 
                                 + title.sentence.title() 
@@ -167,7 +167,7 @@ class CordSearchQATool(TextSearchQATool):
                                     + " .</strong>")
                 else:
                     html_output += entry.sentence.capitalize() + ". "
-            html_output += "</p><br>"
+            html_output += "</p><br><br>"
         
         return answer_tuples, html_output
 
