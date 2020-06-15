@@ -400,7 +400,7 @@ default_pop_keywords = {
                            "doctor", "nurse", "surgeon", "physician", "clinician"],
     "The Elderly": ["elderly", "old.{,10}(patient|people|person|men|adult|women)", "old age",
                     "geriatric", "pension", "retired", "age?ing", "frail"],
-    "Mentally Ill": ["mental.{,20)ill", "psycholog"],
+    "Mentally Ill": ["mental.{,20}ill", "psycholog"],
     "ICU Patients": ["patient.{,100}intensive\Wcare", "patient.{,100}icu",
                      "intensive\Wcare.{,100}patient", "icu.{,100}patient" ],
     "Parents": ["parent"],
