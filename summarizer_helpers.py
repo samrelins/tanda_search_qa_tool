@@ -394,7 +394,8 @@ default_pop_keywords = {
                      "judicial"],
     "Refugees": ["refugee", "displaced"],
     "Economically Vulnerable": ["unemploy", "ineqaulit", "pover", 
-                                "hunger", "starv"]
+                                "hunger", "starv"],
+    "children": ["paed"]
 }
 
 

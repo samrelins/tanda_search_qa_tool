@@ -110,9 +110,10 @@ class CordSearchQATool(TextSearchQATool):
             text = self.texts[text_id]
             html_results += ("<h2><strong>" 
                              + text_id + " " + text.title 
-                             + "</h2></strong>")
+                             + "</h2></strong><br>")
             if type(text.abstract) == str:
                 html_results += "<p>" + text.abstract + "<p>"
+        html_results += "<br><br>"
         return html_results
 
 
