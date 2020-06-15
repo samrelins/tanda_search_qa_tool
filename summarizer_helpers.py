@@ -386,7 +386,7 @@ def assign_type_from_text(paper_text):
 
 default_pop_keywords = {
     "Homeless": ["homeless", "underhoused"],
-    "Substance Abusers": ["(substance|alcohol|drug|opioid) (use|abuse|depend)",
+    "Substance Abusers": ["(substance|alcohol|drug|opioid).{,100}(use|abuse|depend)",
                           "addict", 
                           "narcotic"],
     "Incarcerated": ["criminal", "prison", 
@@ -395,7 +395,21 @@ default_pop_keywords = {
     "Refugees": ["refugee", "displaced"],
     "Economically Vulnerable": ["unemploy", "ineqaulit", "pover", 
                                 "hunger", "starv"],
-    "children": ["paed"]
+    "Children": ["paed", "child", "infant", "baby", "toddler"],
+    "Healthcare Workers": ["(health(care)?|clinical) (worker|provider|staff|professional)", 
+                           "doctor", "nurse", "surgeon", "physician", "clinician"],
+    "The Elderly": ["elderly", "old.{,10}(patient|people|person|men|adult|women)", "old age",
+                    "geriatric", "pension", "retired", "age?ing", "frail"],
+    "Mentally Ill": ["mental.{,20)ill", "psycholog"],
+    "ICU Patients": ["patient.{,100}intensive\Wcare", "patient.{,100}icu",
+                     "intensive\Wcare.{,100}patient", "icu.{,100}patient" ],
+    "Parents": ["parent"],
+    "Diabetics": ["diabetic"],
+    "Hearing Impaired": ["hearing.{,100}(loss|impair)", "deaf"],
+    "Epileptics": ["epilep"],
+    "Cancer Patients": ["cancer"],
+    "Caregivers": ["carer", "care\W?giver"],
+    "Students": ["student"]
 }
 
 

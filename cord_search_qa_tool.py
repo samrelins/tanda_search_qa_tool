@@ -109,11 +109,11 @@ class CordSearchQATool(TextSearchQATool):
                 break
             text = self.texts[text_id]
             html_results += ("<h2><strong>" 
-                             + text_id + " " + text.title 
+                             + text_id + " - " + text.title 
                              + "</h2></strong><br>")
             if type(text.abstract) == str:
                 html_results += "<p>" + text.abstract + "<p>"
-        html_results += "<br><br>"
+            html_results += "<br><br>"
         return html_results
 
 
