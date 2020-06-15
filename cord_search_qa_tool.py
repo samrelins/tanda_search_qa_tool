@@ -116,11 +116,12 @@ class CordSearchQATool(TextSearchQATool):
         return html_results
 
 
-    def return_html_answers(self, search_name, question, 
+    def return_html_answers(self, search_name, question, min_score=None 
                             highlight_score=-2, top_n=100, max_length=128):
 
         answer_tuples = self.return_answers(search_name=search_name,
                                             question=question,
+                                            min_score=min_score,
                                             max_length=max_length)
         
         answer_df = pd.DataFrame(answer_tuples, columns=["cord_uid",
