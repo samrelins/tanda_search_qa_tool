@@ -58,7 +58,9 @@ class CordResultSummarizer:
         print('=' * 100)
 
 
-    def summary_table(self, pop_keywords=default_pop_keywords, n_hits=10):
+    def summary_table(self, pop_keywords=default_pop_keywords, n_hits=10,
+                      challenge_question="what is the problem or challenge",
+                      solution_question="what is the solution or recommendation"):
 
         print(f"\nBuilding summary table from {len(self.abstracts.keys())} papers", flush=True)
         summary_table = {
@@ -69,12 +71,12 @@ class CordResultSummarizer:
     
         print(f"Finding challenges from paper text", flush=True)
         challenge_answers = self._return_answers(
-            question="what is the difficulty or problem",
+            question=challenge_question,
             texts_dict=self.abstracts
         )
         print(f"Finding solutions from paper text", flush=True)
         solution_answers = self._return_answers(
-            question="what is the solution or recommendationn",
+            question=solution_question,
             texts_dict=self.full_texts
         )
 

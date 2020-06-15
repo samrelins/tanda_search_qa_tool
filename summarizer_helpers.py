@@ -394,7 +394,7 @@ default_pop_keywords = {
                      "judicial"],
     "Refugees": ["refugee", "displaced"],
     "Economically Vulnerable": ["unemploy", "ineqaulit", "pover", 
-                                "hunger", "starv", ""]
+                                "hunger", "starv"]
 }
 
 
@@ -415,4 +415,4 @@ def find_populations(text, pop_keywords, n_hits):
         if hits > n_hits:
             results.append(population)
 
-    return results
+    return ", ".join(results)

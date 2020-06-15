@@ -168,7 +168,7 @@ class CordSearchQATool(TextSearchQATool):
                     html_output += entry.sentence.capitalize() + ". "
             html_output += "</p><br>"
         
-        return html_output
+        return answer_tuples, html_output
 
 
     def _split_text_to_sentences(self, text_ids, texts):
