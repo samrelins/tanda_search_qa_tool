@@ -117,11 +117,11 @@ class CordSearchQATool(TextSearchQATool):
 
 
     def return_html_answers(self, search_name, question, min_score=None, 
-                            highlight_score=-4, top_n=10, max_length=128):
+                            highlight_score=-2, top_n=10, max_length=128):
 
         answer_tuples = self.return_answers(search_name=search_name,
                                             question=question,
-                                            min_score=min_score,
+                                            min_score=None,
                                             max_length=max_length)
         
         answer_df = pd.DataFrame(answer_tuples, columns=["cord_uid",
@@ -168,8 +168,13 @@ class CordSearchQATool(TextSearchQATool):
                 else:
                     html_output += entry.sentence.capitalize() + ". "
             html_output += "</p><br><br>"
-        
-        return answer_tuples, html_output
+
+        output_answer_tuples = []
+        for answer_tuple in answer_tuples:
+            if answer_tuple[3] > min_score:
+                output_answer_tuples.append(answer_tuple)
+
+        return output_answer_tuples, html_output
 
 
     def _split_text_to_sentences(self, text_ids, texts):
