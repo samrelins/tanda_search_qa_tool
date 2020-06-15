@@ -58,7 +58,7 @@ class CordResultSummarizer:
         print('=' * 100)
 
 
-    def summary_table(self, pop_keywords=default_pop_keywords, n_hits=10,
+    def summary_table(self, pop_keywords=default_pop_keywords, n_hits=5,
                       challenge_question="what is the problem or challenge",
                       solution_question="what is the solution or recommendation"):
 

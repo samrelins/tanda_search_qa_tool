@@ -415,4 +415,7 @@ def find_populations(text, pop_keywords, n_hits):
         if hits > n_hits:
             results.append(population)
 
-    return ", ".join(results)
+    if results:
+        return ", ".join(results)
+    else:
+        return "General Population"
