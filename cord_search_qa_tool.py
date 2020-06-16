@@ -130,27 +130,19 @@ class CordSearchQATool(TextSearchQATool):
                                                          "sentence",
                                                          "score"])
 
-        title_mask = answer_df.sentence_no == 0
-
-        title_scores = answer_df[title_mask][["cord_uid", "score"]]
-        title_scores["score"] = title_scores.score * 2
-
-        abstract_scores = answer_df[~title_mask][["cord_uid", "score"]]
-        abstract_scores = abstract_scores.groupby("cord_uid").max()
-
-        paper_scores = abstract_scores.merge(title_scores, on="cord_uid", how="left")
-        paper_scores["score"] = np.sum(paper_scores.iloc[:,1:], axis=1)
-        paper_scores.sort_values("score", ascending=False, inplace=True)
+        high_scores = answer_df[["cord_uid", "score"]]
+        high_scores = high_scores.groupby("cord_uid").max()
+        high_scores.sort_values("score", ascending=False, inplace=True)
 
         html_output = f"<h1>Question: {question}</h1><br><br>"
-        for idx, cord_uid in enumerate(paper_scores.cord_uid.values):
+        for idx, cord_uid in enumerate(high_scores.cord_uid.values):
             if idx > top_n:
                 break
             paper_mask = answer_df.cord_uid == cord_uid
             paper = answer_df[paper_mask].sort_values("sentence_no")
             title = paper.iloc[0]
             if title.score > highlight_score:
-                html_output += ("<h3 style='color:orange'>" 
+                html_output += ("<h3 style='color:magenta'>" 
                                 + title.sentence.title() 
                                 + " - " 
                                 + title.cord_uid + "</h3><br>")
@@ -163,12 +155,15 @@ class CordSearchQATool(TextSearchQATool):
             html_output += "<p>"
             for entry in paper.iloc[1:].itertuples():
                 if entry.score > highlight_score:
-                    html_output += ("<strong style='color:orange'>" 
+                    html_output += ("<strong style='color:magenta'>" 
                                     + entry.sentence.capitalize() 
                                     + " .</strong>")
                 else:
                     html_output += entry.sentence.capitalize() + ". "
             html_output += "</p><br><br>"
+        
+        if min_score is None:
+            return answer_tuples, html_output
 
         output_answer_tuples = []
         for answer_tuple in answer_tuples:

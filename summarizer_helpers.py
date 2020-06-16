@@ -384,7 +384,77 @@ def assign_type_from_text(paper_text):
     return "expert review"
     
 
-default_pop_keywords = {
+def find_populations(text, n_hits):
+    
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(text)
+
+    subject_keywords = [r"\Apatients\Z", r"\Apeople\Z", r"\Apersons\Z", r"\Awomen\Z", 
+                        r"\Amen\Z",  r"\Astaff\Z", r"\Aworkers\Z",  r"\Aindividuals\Z", 
+                        r"\Aadults\Z", r"\Amembers\Z",  r"\Aprofessionals\Z", r"\Aproviders\Z",
+                        r"\Aresidents\Z", r"\Agroups\Z", r"[cimz]ans\Z", r"ists\W", r"\Acommunities\Z", r"\Acountries\Z"]
+
+    subject_p = re.compile("|".join(subject_keywords))
+    population_mentions = {} 
+
+    for token in doc:
+        if subject_p.search(token.text):
+            
+            if not token.text in population_mentions.keys():
+                population_mentions[token.text] = []
+                
+            check_token_idx = 1
+            hit_words_f = []
+            while token.i + check_token_idx < len(doc):
+
+                current_token =  doc[token.i + check_token_idx]
+                if current_token.pos_ in ["NOUN", "PROPN"] and current_token.dep_ in ["pobj", "dobj", "nmod", "nsubj" "acomp"]:
+                    hit_words_f.append(current_token.text)
+                    hit_string_f = f"{token.text} {' '.join(hit_words_f)}"
+                    break
+                elif current_token.pos_ in ["ADP", "ADJ", "DET", "NOUN", "ADV"]:
+                    hit_words_f.append(current_token.text)
+                    check_token_idx += 1
+                elif current_token.pos_ == "VERB" and current_token.dep_ in  ["acl", "amod", "compound", "pcomp", "relcl"]:
+                    hit_words_f.append(current_token.text)
+                    check_token_idx += 1
+                else:
+                    hit_string_f = ""
+                    break
+            
+            check_token_idx = -1
+            hit_words_b = []
+            while token.i + check_token_idx > 0:
+                current_token =  doc[token.i + check_token_idx]
+                correct_pos = current_token.pos_ in ["ADV", "ADJ", "PROPN", "NOUN"]
+                not_poss = not current_token.dep_ in ["poss"] 
+                is_hyph = current_token.tag_ == "HYPH"
+                is_pcomp = current_token.dep_ == "pcomp"
+                is_ok_verb = current_token.pos_ == "VERB" and current_token.dep_ == "amod"
+                if (correct_pos and not_poss) or is_hyph or is_pcomp or is_ok_verb:
+                    hit_words_b.append(current_token.text)
+                    check_token_idx -= 1
+                else:
+                    break
+            
+            if hit_string_f:
+                population_mentions[token.text].append(hit_string_f)
+            if hit_words_b:
+                hit_string_b = f"{' '.join(hit_words_b[::-1])} {token.text}"
+                population_mentions[token.text].append(hit_string_b)
+        
+    output_strings = []
+    for mentions in population_mentions.values():
+        top_results = Counter(mentions).most_common()
+        for result in top_results:
+            if not "covid" in result[0] and result[1] > n_hits:
+                output_strings.append(result[0])
+                break
+    
+    return ", ".join(output_strings)
+
+
+pop_keywords = {
     "Homeless": ["homeless", "underhoused"],
     "Substance Abusers": ["(substance|alcohol|drug|opioid).{,100}(use|abuse|depend)",
                           "addict", 
@@ -413,7 +483,7 @@ default_pop_keywords = {
 }
 
 
-def find_populations(text, pop_keywords, n_hits):
+def find_populations_backup(text, n_hits):
 
     population_hits ={}
     for population in pop_keywords.keys():

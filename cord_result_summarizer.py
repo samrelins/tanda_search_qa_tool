@@ -58,10 +58,9 @@ class CordResultSummarizer:
         print('=' * 100)
 
 
-    def summary_table(self, pop_keywords=default_pop_keywords, n_hits=5,
-                      challenge_question="what is the problem issue challenge",
+    def summary_table(self, n_hits=2, challenge_question="what is the problem issue challenge", 
                       solution_question="what action should be taken"):
-
+    
         print(f"\nBuilding summary table from {len(self.abstracts.keys())} papers", flush=True)
         summary_table = {
             "cord_uid": [], "date": [], "study": [], "study_type": [],
@@ -103,9 +102,10 @@ class CordResultSummarizer:
                 get_strength_of_evidence(paper_text)
             )
 
-            summary_table["addressed_population"].append(
-                find_populations(paper_text, pop_keywords, n_hits)
-            )
+            addressed_population = find_populations(paper_text, n_hits)
+            if not addressed_population:
+                addressed_population = find_populations_backup(paper_text, n_hits=5)
+            summary_table["addressed_population"].append(addressed_population)
 
             paper_challenge_answers = [
                 (answer, score) for answer_uid, _, answer, score in challenge_answers
