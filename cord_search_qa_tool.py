@@ -131,9 +131,10 @@ class CordSearchQATool(TextSearchQATool):
                                                          "score"])
 
         high_scores = answer_df[["cord_uid", "score"]]
-        high_scores = high_scores.groupby("cord_uid").max()
+        high_scores = high_scores.groupby("cord_uid", as_index=False).max()
         high_scores.sort_values("score", ascending=False, inplace=True)
 
+        print(high_scores)
         html_output = f"<h1>Question: {question}</h1><br><br>"
         for idx, cord_uid in enumerate(high_scores.cord_uid.values):
             if idx > top_n:
