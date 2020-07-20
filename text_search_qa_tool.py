@@ -61,6 +61,10 @@ class TextSearchQATool:
 
     def _init_qa_model_atts(self, qa_model_dir):
         # Load pretrained tokenizer
+        qa_model_dir += "/models/tanda_roberta_base_asnq/ckpt"
+        if not os.path.exists(qa_model_dir):
+            raise TypeError(f"TandA directory doesn't exist or path to ckpt doesn't match {qa_model_dir}")
+            
         tokenizer_class = RobertaTokenizer
         self.tokenizer = tokenizer_class.from_pretrained(qa_model_dir,
                                                 do_lower_case=True,
@@ -85,7 +89,7 @@ class TextSearchQATool:
 
 
     def search(self, containing=[], not_containing=[], search_name=None, 
-               containing_threshold=2):
+               containing_threshold=0):
 
         # check inputs are correct
         if not containing and not not_containing:
