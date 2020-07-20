@@ -6,6 +6,26 @@ The tool uses the Amazon Alexa Team's Transfer and Adapt Bert framework and a pr
 
 ## contents
 
-* **build_summaries_df.py**
+* **build_kaggle_summaries_df.py**
   
-  A short script to build a dataframe consolidating the entries from the kaggle summary table examples. Used to test output of final model
+  Short script used to concatenate the summary tables provided by Kaggle into one large table. Used to attempt semi-supervised learning (no success) and analysis of model output.
+
+* **cord_result_summarizer.py**
+  
+  Tool to build summary table entries from individual papers. Uses Roberta-Tanda model to identify sentences from paper to use as **challenge** and **solution** features, and regex / spacy POS & NER tagging to find **study_type**, **strength_of_evidence** and **addressed_population**.
+  
+* **cord_search_qa_tool.py**
+  
+  Tool to search Cord-19 corpora to identify papers that answer a given research question. Utilises regex search terms to identify possible results and Roberta-TandA model to identify papers with sentence-level answers to a research question within the abstract. 
+
+* **prep_metadata.py**
+  
+  A short script to clean metadata provided with Cord-19 dataset and add missing abstracts to papers that have available body text.
+  
+* **summarizer_helpers.py**
+  
+  Helper functions that facilitate the cord_search_qa_tool.
+  
+* **text_search_qa_tool.py**
+  
+  Generalised search tool from which the cord_search_qa_tool is built. Takes a corpora of texts and utilises regex search and Roberta-TandA sentence-level QA to find texts that contain an answer to a given question.
