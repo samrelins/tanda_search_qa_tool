@@ -32,7 +32,7 @@ The tool uses the Amazon Alexa Team's Transfer and Adapt Bert framework and a pr
   
 ## Requirements
 
-Alongside the python packages in [requirements.txt](https://github.com/samrelins/tanda_search_qa_tool/blob/master/README.md), the model requires the following to function:
+Alongside the python packages in [requirements.txt](https://github.com/samrelins/tanda_search_qa_tool/blob/master/requirements.txt), the model requires the following to function:
 
 * a pre-trained variant of the TandA model, available [here](https://github.com/alexa/wqa_tanda). Extract in the main directory of the project and refer to the directory name when initializing the respective tool. Note: the model should function with any of the pre-trained TandA models, but has been tested using the "transferred" Roberta base and large variants only.
 * The [CORD-19 dataset](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge/) (if wanting to use the `cord_search_qa_tool` and `cord_result_summarizer`) again extracted in the main directory of the project. 
