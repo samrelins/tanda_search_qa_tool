@@ -17,6 +17,10 @@ class CordResultSummarizer:
         print('=' * 100)
         print("Building result summarizer")
         self.meta = meta
+        if not data_dir[-1] == '/':
+            data_dir += '/'
+        if not os.path.exists(data_dir):
+            raise ValueError(f"{data_dir} doesn't exist")
         self.data_dir = data_dir
         self._init_text_atts(cord_uids, meta, data_dir)
         self._init_qa_model_atts(tanda_dir)
@@ -39,6 +43,11 @@ class CordResultSummarizer:
 
 
     def _init_qa_model_atts(self, tanda_dir):
+        
+        tanda_dir += "/models/tanda_roberta_base_asnq/ckpt"
+        if not os.path.exists(tanda_dir):
+            raise TypeError(f"TandA directory doesn't exist or path to ckpt doesn't match {tanda_dir}")
+            
         # Load pretrained tokenizer
         tokenizer_class = RobertaTokenizer
         self.tokenizer = tokenizer_class.from_pretrained(tanda_dir,

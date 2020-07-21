@@ -1,0 +1,9 @@
+nltk
+numpy
+pandas
+pytorch
+boto3
+requests
+sacremoses
+sentencepiece
+spacy
