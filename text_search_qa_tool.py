@@ -40,7 +40,9 @@ class SearchResult:
         repr_string += '=' * 50 + '\n'
         repr_string += f"{self.search_no} Searches:\n"
         for i in range(self.search_no):
-            repr_string += f"Search {i + 1}:\n"
+            if i == 0:
+                repr_string += "Original Search"
+            repr_string += f"Refined Search {i}:\n"
             for containing_item in self.containing:
                 if containing_item[0] == i + 1:
                     repr_string += f"\tcontaining: {containing_item[1]}\n"
