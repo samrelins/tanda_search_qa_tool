@@ -42,7 +42,8 @@ class SearchResult:
         for i in range(self.search_no):
             if i == 0:
                 repr_string += "Original Search"
-            repr_string += f"Refined Search {i}:\n"
+            else:
+                repr_string += f"Refined Search {i}:\n"
             for containing_item in self.containing:
                 if containing_item[0] == i + 1:
                     repr_string += f"\tcontaining: {containing_item[1]}\n"
