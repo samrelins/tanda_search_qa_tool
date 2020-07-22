@@ -41,7 +41,7 @@ class SearchResult:
         repr_string += f"{self.search_no} Searches:\n"
         for i in range(self.search_no):
             if i == 0:
-                repr_string += "Original Search"
+                repr_string += "Original Search:\n"
             else:
                 repr_string += f"Refined Search {i}:\n"
             for containing_item in self.containing:
