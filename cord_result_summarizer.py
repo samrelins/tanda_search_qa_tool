@@ -25,7 +25,7 @@ class CordResultSummarizer:
         self._init_text_atts(cord_uids, meta, data_dir)
         self._init_qa_model_atts(tanda_dir)
 
-
+        
     def _init_text_atts(self, cord_uids, meta, data_dir):
 
         full_texts_dict = {}
@@ -69,7 +69,9 @@ class CordResultSummarizer:
 
     def summary_table(self, n_hits=2, challenge_question="what is the problem issue challenge", 
                       solution_question="what action should be taken"):
-    
+        
+        nlp = spacy.load("en_core_web_sm")
+
         print(f"\nBuilding summary table from {len(self.abstracts.keys())} papers", flush=True)
         summary_table = {
             "cord_uid": [], "date": [], "study": [], "study_type": [],
@@ -88,11 +90,13 @@ class CordResultSummarizer:
             texts_dict=self.full_texts
         )
 
+
         print(f"\nBuilding table entries", flush=True)
         for cord_uid in tqdm(self.full_texts.keys()):
             
             paper_text = self.full_texts[cord_uid]
             meta_entry = self.meta[self.meta.cord_uid == cord_uid].iloc[0]
+            doc = nlp(paper_text)
         
             summary_table["cord_uid"].append(cord_uid)
             summary_table["date"].append(meta_entry.doi)
@@ -108,10 +112,10 @@ class CordResultSummarizer:
                 summary_table["study_type"].append(type_from_text)
         
             summary_table["strength_of_evidence"].append(
-                get_strength_of_evidence(paper_text)
+                get_strength_of_evidence(paper_text, doc)
             )
 
-            addressed_population = find_populations(paper_text, n_hits)
+            addressed_population = find_populations(paper_text, doc, n_hits)
             if not addressed_population:
                 addressed_population = find_populations_backup(paper_text, n_hits=5)
             summary_table["addressed_population"].append(addressed_population)

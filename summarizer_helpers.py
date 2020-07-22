@@ -79,12 +79,9 @@ def get_paper_text(cord_uid, meta, data_dir):
     return paper_text
 
 
-nlp = spacy.load("en_core_web_sm")
 accepted_tokens = ["amod", "compound", "npadvmod", "prep", "det", "compound", "punct", "nummod", "nsubj", "pobj"]
 
-def extract_text_features(paper_text):
-
-    doc = nlp(paper_text)
+def extract_text_features(paper_text, doc):
 
     results = { 
         "quantities": [],
@@ -181,9 +178,9 @@ def extract_text_features(paper_text):
     return results
     
 
-def get_strength_of_evidence(text):
+def get_strength_of_evidence(text, doc):
     
-    features = extract_text_features(text)
+    features = extract_text_features(text, doc)
     
     all_quantity_nouns = [noun for _, noun in features["quantities"]]
     most_common_nouns = Counter(all_quantity_nouns).most_common()
@@ -384,11 +381,8 @@ def assign_type_from_text(paper_text):
     return "expert review"
     
 
-def find_populations(text, n_hits):
+def find_populations(text, doc, n_hits):
     
-    nlp = spacy.load("en_core_web_sm")
-    doc = nlp(text)
-
     subject_keywords = [r"\Apatients\Z", r"\Apeople\Z", r"\Apersons\Z", r"\Awomen\Z", 
                         r"\Amen\Z",  r"\Astaff\Z", r"\Aworkers\Z",  r"\Aindividuals\Z", 
                         r"\Aadults\Z", r"\Amembers\Z",  r"\Aprofessionals\Z", r"\Aproviders\Z",
