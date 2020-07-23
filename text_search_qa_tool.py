@@ -49,7 +49,8 @@ class SearchResult:
                     repr_string += f"\tcontaining: {containing_item[1]}\n"
             for not_containing_item in self.not_containing:
                 if not_containing_item[0] == i + 1:
-                    repr_string += f"\tnot containing: {not_containing_item[1]}\n"
+                    repr_string += ("\tnot containing: "
+                                    f"{not_containing_item[1]}\n")
         return repr_string
 
 
@@ -66,7 +67,8 @@ class TextSearchQATool:
         # Load pretrained tokenizer
         qa_model_dir += "/models/tanda_roberta_base_asnq/ckpt"
         if not os.path.exists(qa_model_dir):
-            raise TypeError(f"TandA directory doesn't exist or path to ckpt doesn't match {qa_model_dir}")
+            raise TypeError("TandA directory doesn't exist or path to ckpt "
+                            f"doesn't match {qa_model_dir}")
             
         tokenizer_class = RobertaTokenizer
         self.tokenizer = tokenizer_class.from_pretrained(qa_model_dir,
@@ -74,7 +76,10 @@ class TextSearchQATool:
                                                 cache_dir=None)
         
         # collect GPU variables to mount tensors
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        else: 
+            self.device = torch.device("cpu")
 
         print("Initialising QA Model")
         # define model and set to eval
@@ -138,13 +143,20 @@ class TextSearchQATool:
         
         # check inputs are correct
         if not containing and not not_containing:
-            return TypeError("Must specify one of containing / not containing input variables")
-        elif containing and type(containing) is not list:
-            return TypeError(f"containing cannot be type {type(containing)} - must be type list of regular expressions")
-        elif not_containing and type(not_containing) is not list:
-            return TypeError(f"not containing cannot be type {type(not_containing)} - must be type list of regular expressions")
-        elif search_name is not None and search_name in self.search_results.keys():
-            return TypeError(f"Search name {search_name} already exists. If you wish to refine these results, call the refine method.")            
+            return TypeError("Must specify one of containing "
+                             "/ not containing input variables")
+        if containing and type(containing) is not list:
+            return TypeError(f"containing cannot be type {type(containing)} "
+                             "- must be type list of regular expressions")
+        if not_containing and type(not_containing) is not list:
+            return TypeError("not containing cannot be type "
+                             f"`{type(not_containing)}` - must be type "
+                             "`list` of regular expressions")
+        search_names= self.search_results.keys()
+        if search_name is not None and search_name in search_names:
+            return TypeError(f"Search name {search_name} already exists. "
+                             "If you wish to refine these results, "
+                             "call the refine method.") 
 
         # find an unused search name if none entered
         if search_name is None:
@@ -181,7 +193,8 @@ class TextSearchQATool:
                 containing = containing,
                 not_containing = not_containing
             )
-            print(f"{len(search_results_ids)} search results returned and stored in {search_name}")
+            print(f"{len(search_results_ids)} search results "
+                   "returned and stored in {search_name}")
         else:
             print(f"Search returned no results")
 
@@ -191,13 +204,18 @@ class TextSearchQATool:
 
         # check for correct input
         if search_name not in self.search_results.keys():
-            return TypeError(f"Invalid search name {search_name}. Try one of {self.search_results.keys()}")            
+            return TypeError(f"Invalid search name {search_name}. "
+                             f"Try one of {self.search_results.keys()}") 
         if not containing and not not_containing:
-            return TypeError("Must specify one of containing / not containing input variables")
-        elif containing and type(containing) is not list:
-            return TypeError(f"containing cannot be type {type(containing)} - must be type list of regular expressions")
-        elif not_containing and type(not_containing) is not list:
-            return TypeError(f"not containing cannot be type {type(not_containing)} - must be type list of regular expressions")
+            return TypeError("Must specify one of containing "
+                             "/ not containing input variables")
+        if containing and type(containing) is not list:
+            return TypeError(f"containing cannot be type {type(containing)} "
+                             "- must be type list of regular expressions")
+        if not_containing and type(not_containing) is not list:
+            return TypeError("not containing cannot be type "
+                             f"{type(not_containing)} - must be "
+                             "type list of regular expressions")
 
         # find required SearchResult from search_results dict
         search = self.search_results[search_name]
@@ -227,12 +245,13 @@ class TextSearchQATool:
                 containing = containing,
                 not_containing = not_containing
             )
-            print(f"{len(refined_results_ids)} refined results returned and stored in {search_name}")
+            print(f"{len(refined_results_ids)} refined results returned "
+                  f"and stored in {search_name}")
         else:
             print(f"Search returned no results")
 
 
-    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing, 
+    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing,
                              containing_threshold):
 
         output_ids = search_texts_ids
@@ -254,7 +273,8 @@ class TextSearchQATool:
         return output_ids
 
 
-    def return_answers(self, question, search_name=None, min_score=None, max_length=128):
+    def return_answers(self, question, search_name=None, 
+                       min_score=None, max_length=128):
 
         if not search_name is None:
             search_texts_ids = self.search_results[search_name].ids
@@ -262,13 +282,16 @@ class TextSearchQATool:
             search_texts_ids = self.texts.keys()
 
         print('=' * 100)
-        print(f"Checking {len(search_texts_ids)} search results for answers to {question}")
+        print(f"Checking {len(search_texts_ids)} search results "
+              f"for answers to {question}")
 
-        # collect texts that correspond with ids from search and create (sentence, text_id) tuples
+        # collect texts that correspond with ids from search 
+        # and create (sentence, text_id) tuples
         search_texts = [self.texts[text_id] for text_id in search_texts_ids]
         sentence_tuples = self._split_text_to_sentences(search_texts_ids,
                                                         search_texts)
-        # create input examples with question and sentence (potential answer) pairs        
+        # create input examples with question 
+        # and sentence (potential answer) pairs 
         input_examples = []
         for sentence_tuple in sentence_tuples:
             text_id, sentence_no, sentence = sentence_tuple
@@ -280,7 +303,7 @@ class TextSearchQATool:
             input_examples.append(input_example)
         print("Inputs converted to BERT InputExamples")
 
-        # take input examples and convert to input features with appropriate padding
+        # take input examples and convert to input features with padding
         input_features = []
         for idx, example in enumerate(input_examples):
             inputs = self.tokenizer.encode_plus(
@@ -289,7 +312,8 @@ class TextSearchQATool:
                 add_special_tokens=True,
                 max_length=max_length
             )
-            input_ids, token_type_ids = inputs["input_ids"], inputs["token_type_ids"]
+            input_ids = inputs["input_ids"]
+            token_type_ids = inputs["token_type_ids"]
     
             attention_mask = [1] * len(input_ids)
             padding_length = max_length - len(input_ids)
@@ -310,9 +334,11 @@ class TextSearchQATool:
         # Convert to Tensors and build dataset
         all_input_ids = torch.tensor([f.input_ids for f in input_features], 
                                  dtype=torch.long)
-        all_attention_mask = torch.tensor([f.attention_mask for f in input_features], 
+        all_attention_mask = torch.tensor([f.attention_mask 
+                                           for f in input_features], 
                                           dtype=torch.long)
-        all_token_type_ids = torch.tensor([f.token_type_ids for f in input_features], 
+        all_token_type_ids = torch.tensor([f.token_type_ids 
+                                           for f in input_features], 
                                            dtype=torch.long)
         tensor_dataset = TensorDataset(all_input_ids, 
                                        all_attention_mask, 
@@ -325,8 +351,10 @@ class TextSearchQATool:
                                  sampler=sampler, 
                                  batch_size=100)
         print("TensorDataset converted to torch DataLoader")
-        print(f"Ranking {len(sentence_tuples)} possible answers from {len(search_texts)} texts:", flush=True)
-        # feed data to model and output logits i.e. [likelihood not answer, likelihood answer]
+        print(f"Ranking {len(sentence_tuples)} possible answers from "
+              f"{len(search_texts)} texts:", flush=True)
+        # feed data to model and output logits 
+        # i.e. [likelihood not answer, likelihood answer]
         all_logits = []
 
         with torch.no_grad():
@@ -336,7 +364,8 @@ class TextSearchQATool:
                           'attention_mask': model_input[1]}
                 batch_logits = self.model(**inputs)[0]
                 if len(all_logits):
-                    all_logits = np.concatenate([all_logits, batch_logits.cpu()])
+                    all_logits = np.concatenate([all_logits, 
+                                                 batch_logits.cpu()])
                 else:
                     all_logits = np.array(batch_logits.cpu())
 
@@ -404,7 +433,8 @@ class TextSearchQATool:
         __________
         
              search_name: str
-                 Key of search, texts from which will be used to generate answers
+                 Key of search, texts from which will be used to generate 
+                 answers
              question: str 
                  Question to be used to score potential answers against
              min_score: int, optional
@@ -453,17 +483,19 @@ class TextSearchQATool:
             html_results += "<p>"
             for entry in text.itertuples():
                 if entry.score > highlight_score:
-                    html_results += "<strong style='color:yellow'>" + entry.sentence.capitalize() + " .</strong>"
+                    html_results += ("<strong style='color:yellow'>" 
+                                     f"{entry.sentence.capitalize()} </strong>")
                 else:
-                    html_results += entry.sentence.capitalize() + ". "
+                    html_results += f"{entry.sentence.capitalize()} "
             html_results += "</p><br>"
-
-        output_answer_tuples = []
-        for answer_tuple in answer_tuples:
-            if answer_tuple[3] > min_score:
-                output_answer_tuples.append(answer_tuple)
-
-        return output_answer_tuples, html_output
+            
+        if min_score is None:
+            output_answers = answer_tuples
+        else:
+            output_answers = [answer for answer in answer_tuples 
+                              if answer[3] > min_score]
+            
+        return output_answers, html_results
 
 
     def return_html_search_results(self, search_name, n_results=100):

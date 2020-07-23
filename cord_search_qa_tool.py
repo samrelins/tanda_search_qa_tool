@@ -60,7 +60,8 @@ class CordSearchQATool(TextSearchQATool):
             model checkpoint
         only_covid: bool, default True
             If True, identify papers that relate specifically to covid-19 and 
-            remove any papers that dont. Otherwise keep all entries in metadata.csv
+            remove any papers that dont. Otherwise keep all entries in 
+            metadata.csv
             
     Attributes
     ___________
@@ -281,14 +282,15 @@ class CordSearchQATool(TextSearchQATool):
         __________
         
              search_name: str
-                 Key of search, texts from which will be used to generate answers
+                 Key of search, texts from which will be used to generate 
+                 answers
              question: str 
                  Question to be used to score potential answers against
              min_score: int, optional
                  Minimum QA score for a sentence to be included in results.
                  If none, every sentence is included in the results
              highlight_score: int, default -2
-                 Minimum QA score for a sentence to be highlighted in the HTML 
+                 Minimum QA score for a sentence to be highlighted in the HTML
                  output
              top_n: int, default 10
                  The number of results to return in the HTML output
@@ -371,7 +373,7 @@ class CordSearchQATool(TextSearchQATool):
         return sentence_tuples
 
     
-    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing, 
+    def _search_by_texts_ids(self, search_texts_ids, containing, not_containing,
                              containing_threshold):
 
         output_ids = search_texts_ids
@@ -387,13 +389,38 @@ class CordSearchQATool(TextSearchQATool):
             not_containing_p = re.compile("|".join(not_containing))
             output_ids = (
                 [text_id for text_id in output_ids
-                 if not not_containing_p.search(self.texts[text_id].text().lower())]
+                 if not not_containing_p.search(
+                     self.texts[text_id].text().lower()
+                 )]
             )
 
         return output_ids
 
 
     def find_missing_abstracts(self, search_name):
+        """
+        Add missing abstracts using the Semantic Scholar API 
+        
+        The semantic scholar API provides API access to the metadata of a huge
+        range of papers, and can be used to find abstracts for those papers
+        that aren't provided with an abstract in the CORD-19 dataset. This
+        method is restricted to papers in the results of a specific search, 
+        as the S2 API will quickly reject access if it receives > 100 requests 
+        in quick succession.
+        
+        Parameters
+        __________
+        
+             search_name: str
+                 Key of search, from which any missing abstracts will be found
+                
+        Returns
+        _______
+        
+            None: abstracts are stored in the `texts` attribute
+        
+        """
+        
         s2_api_address = "https://api.semanticscholar.org/v1/paper/CorpusID:{s2_id}"
         added_abstracts = 0
         print('=' * 100)
@@ -405,8 +432,6 @@ class CordSearchQATool(TextSearchQATool):
                 s2_json = json.loads(r.text)
                 if "abstract" in s2_json.keys():
                     if s2_json["abstract"] is not None:
-                        print(f"Title: {text.title}")
-                        print(f"Abstract: {s2_json['abstract']}\n")
                         text.abstract = s2_json["abstract"]
                         added_abstracts += 1
         print(f"Found and added {added_abstracts} missing abstracts")
