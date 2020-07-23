@@ -25,6 +25,69 @@ class CovidText:
 
 class CordSearchQATool(TextSearchQATool):
 
+    """
+    Tool to find covid papers that answer a specific research question.
+    
+    The search process is conducted in two stages: 
+    
+        1) Identify broad a subset of the corpus containing keywords 
+        relating to the research question - the aim should be to include
+        all possible papers of interest, whilst eliminating papers that
+        bear no relation 
+        
+        See methods: search, refine_search, return_html_search_results
+        and the search_results attribute
+        
+        2) Search over the abstracts for every paper identified in stage 1 
+        for answers to a specific research question. A Roberta-Tanda model 
+        generates scores for each sentence which are used to rank the most 
+        relevant papers. 
+        
+        See methods: return_answers, return_html answers 
+    
+    Functionality and methods inherited from the base TextSearchQATool
+    class.
+    
+    Parameters
+    __________
+    
+        covid_meta: pandas.DataFrame 
+            metadata.csv file from the CORD-19 dataset loaded in a pandas 
+            DataFrame. Note: some preprocessing will be required if duplicate 
+            cord_uids are present.
+        qa_model_dir: str  
+            Location of the tanda model directory containing a pre-trained
+            model checkpoint
+        only_covid: bool, default True
+            If True, identify papers that relate specifically to covid-19 and 
+            remove any papers that dont. Otherwise keep all entries in metadata.csv
+            
+    Attributes
+    ___________
+
+        texts: dict  
+            Dict of [cord_uid]:[abstract] pairs 
+        search_results: dict
+            dict of [search_name]:[SearchResult] pairs. Uses the SearchResult
+            class defined in the text_search_qa_tool module 
+        tokenizer: RobertaTokenizer
+            Hugging face's Transformers implementation of the Bert tokenizer
+        device: torch.device
+            Device on which to mount model (CPU or GPU)
+        model: RobertaForSequenceClassification
+            Hugging Face's Transformers implementation of the Roberta model
+            specialised for sequence classification
+        
+    Methods
+    _______
+    
+        search
+        refine_search
+        return_html_search_results
+        clear_searches
+        return_answers
+        return_html_answers
+    """
 
     def __init__(self, covid_meta, qa_model_dir, only_covid=True):
         texts_dict = self._convert_to_texts(covid_meta, only_covid)
@@ -32,11 +95,6 @@ class CordSearchQATool(TextSearchQATool):
                          qa_model_dir=qa_model_dir)
 
     def _convert_to_texts(self, meta, only_covid):
-        """~
-        Removing duplicates and entries with no abstract from metadata
-        Returns:
-            DataFrame (with useless entries removed)
-        """
         # remove papers with placeholders for abstract
         meta.dropna(subset=["title"], inplace=True)
 

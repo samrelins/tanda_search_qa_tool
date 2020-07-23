@@ -157,14 +157,14 @@ class CordResultSummarizer:
         Parameters
         __________
         
-            n_hits: int
+            n_hits: int, default 2
                 The number of mentions of a population in the paper text 
                 required to be included in the addressed_population feature
-            challenge_question: str
+            challenge_question: str, default "what is the problem issue challenge"
                 The question given to the tanda model when identifying the
                 challenge feature - search is conducted over the text in the
                 abstract only.
-            solution_question: str
+            solution_question: str, default "what action should be taken"
                 The question given to the tanda model when identifying the
                 solution feature - search is conducted over the full paper text
                 
