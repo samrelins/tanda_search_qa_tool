@@ -152,7 +152,7 @@ class CordResultSummarizer:
         Generate a summary of the papers specified in cord_uids
         
         Gathers together all of the functions that identify individual features
-        of the summary table and in a dataframe.
+        of the summary table, and bulds a dataframe from the results.
         
         Parameters
         __________
