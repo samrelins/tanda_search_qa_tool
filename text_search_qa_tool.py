@@ -93,7 +93,49 @@ class TextSearchQATool:
 
     def search(self, containing=[], not_containing=[], search_name=None, 
                containing_threshold=0):
-
+        """
+        Search texts for the presence / absence of specific keywords.
+        
+        A regex search identifies appearances of regular expressions in 
+        each of the texts from the "texts" attribute. Appearances of
+        the expressions in the "containing" parameter list are counted, and 
+        texts  that contain a number greater than the "containing_threshold" 
+        parameter  are added to the search results. If keywords from the 
+        "not_containing" parameter list are found in the text, these are 
+        excluded from the results. 
+        
+        The search follows an OR logic. For example, a search for texts 
+        containing ["cat", "dog"] will return any texts that feature the 
+        regex "cat" or "dog" in sufficient number, or exclude texts that 
+        contain either, depending on the parameters. A search must specify a 
+        "containing" or "not_containing" parameter, or both.
+        
+        
+        Parameters
+        __________
+        
+            containing: list
+                list of regular expressions, appearances of which are counted 
+                for each text.
+            not_containing: list
+                list of regular expressions that are to be excluded from the 
+                search results. 
+            containing_threshold: int, default 2
+                the number of hits from the containing list required for a
+                text to be added to the results
+            search_name: str, optional
+                Name to be used as key in "search_results" dict attribute. If
+                None, a name is automatically assigned in the format 
+                "search[int]"
+                
+        Returns
+        _______
+        
+        None -  Results are stored as a SearchResult object in the 
+                "search_results" attribute.
+        
+        """
+        
         # check inputs are correct
         if not containing and not not_containing:
             return TypeError("Must specify one of containing / not containing input variables")
@@ -332,6 +374,56 @@ class TextSearchQATool:
 
     def return_html_answers(self, search_name, question, min_score=None,
                             highlight_score=-2, top_n=None, max_length=128):
+        """
+        Generate list of answer sentences from `texts` along with a 
+        HTML output of the results.
+        
+        This method is used to identify sentences from the `texts` attribute
+        that are potential answers to the `question` parameter, in the same 
+        manner as the `return_answers` method. Given identical search 
+        parameters, the `return_answers` and `return_html_answers` methods 
+        will return an identical list of results. 
+        
+        ** See `return_answers` for more info on 
+           the QA search process and output **
+        
+        Additionally, this method returns a HTML output of the answer results 
+        to help visualise the QA search. Sentences within texts that 
+        receive a QA score higher than the `highlight_score` parameter are 
+        highlighted in cyan. Intended for use with the Ipython.core.display 
+        module's `display` and `HTML` functions  e.g.:
+        
+        >>> answers_html = searchtool.return_html_answers(
+            [your search parameters here]
+        )
+        >>> display(HTML(answers_html))
+        
+        (the above displays the results of the answer search in the cell output)
+        
+        Parameters
+        __________
+        
+             search_name: str
+                 Key of search, texts from which will be used to generate answers
+             question: str 
+                 Question to be used to score potential answers against
+             min_score: int, optional
+                 Minimum QA score for a sentence to be included in results.
+                 If none, every sentence is included in the results
+             highlight_score: int, default -2
+                 Minimum QA score for a sentence to be highlighted in the HTML 
+                 output
+             top_n: int, default 10
+                 The number of results to return in the HTML output
+             max_length: int, default 128
+                 Parameter used by the Roberta model to fix the input length
+                
+        Returns
+        _______
+        
+            tuple: (list: QA sentence scores, str: HTML) 
+        
+        """
 
         answer_tuples = self.return_answers(search_name=search_name,
                                             question=question,
@@ -375,6 +467,35 @@ class TextSearchQATool:
 
 
     def return_html_search_results(self, search_name, n_results=100):
+        """
+        Generate HTML of the results of the `search` method.
+        
+        This method can be used to visualise the results of the `search` method
+        in a more readable format than printing to the console. Intended for use 
+        with the  Ipython.core.display module's `display` and `HTML` functions 
+        e.g.:
+        
+        >>> search_html = searchtool.return_html_search_results("search0")
+        >>> display(HTML(html_search_output))
+        
+        (the above will display the results of "search0" in the cell output)
+        
+        Parameters
+        __________
+        
+            search_name: str
+                A named search / key value from the `search_results` attribute
+            n_results:
+                The number of results to be returned. Results appear in the same
+                order as the items in the `texts` attribute
+                
+        Returns
+        _______
+        
+            Str: HTML of texts from the specified search
+        
+        """
+        
         html_results = ""
         for idx, text_id in enumerate(self.search_results[search_name].ids):
             if idx == n_results:
@@ -382,3 +503,5 @@ class TextSearchQATool:
             html_results += "<h2><strong>" + text_id + "</h2></strong>"
             html_results += "<p>" + self.texts[text_id] + "<p>"
         return html_results
+    
+    
