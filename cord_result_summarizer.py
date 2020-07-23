@@ -13,21 +13,94 @@ from summarizer_helpers import *
 
 
 class CordResultSummarizer:
+    
+    """
+    Create summary tables of a specified list of papers.
+    
+    Summary tables are generated in the format specified in round 2 task 1 of 
+    the Kaggle CORD-19 competition: Population studies.  
+    
+    Summary table features are: 
+    
+        cord_uid: 
+            unique paper id 
+        date: 
+            date of publication 
+        study: 
+            name of the paper / study 
+        study_type: 
+            study design e.g. "simulation", "retrospective_cohort" 
+        challenge: 
+            The challenge the paper identifies / explores 
+        solution: 
+            The proposed solution to the paper's challenge 
+        strength_of_evidence: 
+            an indication of the scope of the study, in terms
+            of the size of the study population e.g. "200 survey participants"
+        addressed_population: 
+            the group studied i.e. "mental health patients", 
+        study_link: 
+            link to the study online, 
+        journal: 
+            journal in which the study was published
+    
+    Parameters
+    __________
+    
+        cord_uids: list 
+            List of cord_uids identifying papers to be summarized
+        meta: pandas.DataFrame 
+            Metadata dataframe from CORD-19 dataset
+        data_dir: str 
+            Location of directory containing CORD-19 dataset
+        tanda_dir: str 
+            Location of directory containing tanda model checkpoint 
+    
+    Attributes
+    ___________
+
+        data_dir: str 
+            Location of directory containing CORD-19 dataset
+        abstracts: dict 
+            Dict containing [cord_uid]:[abstract text] key-value pairs 
+        full_texts: dict
+            Dict containing [cord_uid]:[body text] key-value pairs 
+        tokenizer: RobertaTokenizer
+            Hugging face's Transformers implementation of the Bert tokenizer
+        device: torch.device
+            Device on which to mount model (CPU or GPU)
+        model: RobertaForSequenceClassification
+            Hugging Face's Transformers implementation of the Roberta model
+            specialised for sequence classification
+        
+    Methods
+    _______
+    
+        summary_table
+        
+    """
+
+    
     def __init__(self, cord_uids, meta, data_dir, tanda_dir):
+        
         print('=' * 100)
         print("Building result summarizer")
         self.meta = meta
+        
+        # check data dir exists - assign to attribute if it does
         if not data_dir[-1] == '/':
             data_dir += '/'
         if not os.path.exists(data_dir):
             raise ValueError(f"{data_dir} doesn't exist")
+            
         self.data_dir = data_dir
         self._init_text_atts(cord_uids, meta, data_dir)
         self._init_qa_model_atts(tanda_dir)
 
         
     def _init_text_atts(self, cord_uids, meta, data_dir):
-
+        # function to collect and abstracts and texts for each paper
+        
         full_texts_dict = {}
         for cord_uid in cord_uids:
             paper_text = get_paper_text(cord_uid, meta, data_dir)
@@ -43,10 +116,13 @@ class CordResultSummarizer:
 
 
     def _init_qa_model_atts(self, tanda_dir):
+        # function to initialise objects for tanda model
         
+        # check if tanda directory exists
         tanda_dir += "/models/tanda_roberta_base_asnq/ckpt"
         if not os.path.exists(tanda_dir):
-            raise TypeError(f"TandA directory doesn't exist or path to ckpt doesn't match {tanda_dir}")
+            raise TypeError("TandA directory doesn't exist or "
+                            f"path to ckpt doesn't match {tanda_dir}")
             
         # Load pretrained tokenizer
         tokenizer_class = RobertaTokenizer
@@ -55,10 +131,11 @@ class CordResultSummarizer:
                                                 cache_dir=None)
         
         # collect GPU variables to mount tensors
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
 
+        # define model and set to eval mode
         print("Initialising QA Model")
-        # define model and set to eval
         model_class = RobertaForSequenceClassification
         self.model = model_class.from_pretrained(tanda_dir)
         self.model.to(self.device)
@@ -67,12 +144,41 @@ class CordResultSummarizer:
         print('=' * 100)
 
 
-    def summary_table(self, n_hits=2, challenge_question="what is the problem issue challenge", 
+    def summary_table(self, n_hits=2, 
+                      challenge_question="what is the problem issue challenge", 
                       solution_question="what action should be taken"):
+        
+        """
+        Generate a summary of the papers specified in cord_uids
+        
+        Gathers together all of the functions that identify individual features
+        of the summary table and in a dataframe.
+        
+        Parameters
+        __________
+        
+            n_hits: int
+                The number of mentions of a population in the paper text 
+                required to be included in the addressed_population feature
+            challenge_question: str
+                The question given to the tanda model when identifying the
+                challenge feature - search is conducted over the text in the
+                abstract only.
+            solution_question: str
+                The question given to the tanda model when identifying the
+                solution feature - search is conducted over the full paper text
+                
+        Returns
+        _______
+        
+            pandas.DataFrame containing the summary data
+        
+        """
         
         nlp = spacy.load("en_core_web_sm")
 
-        print(f"\nBuilding summary table from {len(self.abstracts.keys())} papers", flush=True)
+        print("\nBuilding summary table from "
+              f"{len(self.abstracts.keys())} papers", flush=True)
         summary_table = {
             "cord_uid": [], "date": [], "study": [], "study_type": [],
             "challenge": [], "solution": [], "strength_of_evidence": [],
@@ -117,11 +223,13 @@ class CordResultSummarizer:
 
             addressed_population = find_populations(paper_text, doc, n_hits)
             if not addressed_population:
-                addressed_population = find_populations_backup(paper_text, n_hits=5)
+                addressed_population = find_populations_backup(paper_text, 
+                                                               n_hits=5)
             summary_table["addressed_population"].append(addressed_population)
 
             paper_challenge_answers = [
-                (answer, score) for answer_uid, _, answer, score in challenge_answers
+                (answer, score) 
+                for answer_uid, _, answer, score in challenge_answers
                 if answer_uid == cord_uid
             ]
             challenge = ""
@@ -133,7 +241,8 @@ class CordResultSummarizer:
             summary_table["challenge"].append(challenge)
         
             paper_solution_answers = [
-                (answer, score) for answer_uid, _, answer, score in solution_answers
+                (answer, score) 
+                for answer_uid, _, answer, score in solution_answers
                 if answer_uid == cord_uid
             ]
             solution = ""
@@ -147,10 +256,11 @@ class CordResultSummarizer:
         return pd.DataFrame(summary_table)
 
 
-    def _return_answers(self, question, texts_dict, min_score=None, max_length=128):
+    def _return_answers(self, question, texts_dict, min_score=None, 
+                        max_length=128):
 
         sentence_tuples = self._split_text_to_sentences(texts_dict.keys(),
-                                                        texts_dict.values())
+                                                       texts_dict.values())
         # create input examples with question and sentence (potential answer) pairs        
         input_examples = []
         for sentence_tuple in sentence_tuples:
@@ -171,7 +281,8 @@ class CordResultSummarizer:
                 add_special_tokens=True,
                 max_length=max_length
             )
-            input_ids, token_type_ids = inputs["input_ids"], inputs["token_type_ids"]
+            input_ids = inputs["input_ids"]
+            token_type_ids = inputs["token_type_ids"]
     
             attention_mask = [1] * len(input_ids)
             padding_length = max_length - len(input_ids)
@@ -191,9 +302,11 @@ class CordResultSummarizer:
         # Convert to Tensors and build dataset
         all_input_ids = torch.tensor([f.input_ids for f in input_features], 
                                  dtype=torch.long)
-        all_attention_mask = torch.tensor([f.attention_mask for f in input_features], 
+        all_attention_mask = torch.tensor([f.attention_mask 
+                                           for f in input_features], 
                                           dtype=torch.long)
-        all_token_type_ids = torch.tensor([f.token_type_ids for f in input_features], 
+        all_token_type_ids = torch.tensor([f.token_type_ids 
+                                           for f in input_features], 
                                            dtype=torch.long)
         tensor_dataset = TensorDataset(all_input_ids, 
                                        all_attention_mask, 
@@ -204,7 +317,9 @@ class CordResultSummarizer:
         dataloader = DataLoader(tensor_dataset, 
                                  sampler=sampler, 
                                  batch_size=100)
-        print(f"Ranking {len(sentence_tuples)} possible answers from {len(texts_dict.keys())} texts:", flush=True)
+        print(f"Ranking {len(sentence_tuples)} "
+              f"possible answers from {len(texts_dict.keys())} texts:", 
+              flush=True)
         # feed data to model and output logits i.e. [likelihood not answer, likelihood answer]
         all_logits = []
 
