@@ -36,7 +36,6 @@ class CordSearchQATool(TextSearchQATool):
         bear no relation 
         
         See methods: search, refine_search, return_html_search_results
-        and the search_results attribute
         
         2) Search over the abstracts for every paper identified in stage 1 
         for answers to a specific research question. A Roberta-Tanda model 
@@ -49,7 +48,7 @@ class CordSearchQATool(TextSearchQATool):
     class.
     
     Parameters
-    __________
+    ----------
     
         covid_meta: pandas.DataFrame 
             metadata.csv file from the CORD-19 dataset loaded in a pandas 
@@ -64,7 +63,7 @@ class CordSearchQATool(TextSearchQATool):
             metadata.csv
             
     Attributes
-    ___________
+    ----------
 
         texts: dict  
             Dict of [cord_uid]:[abstract] pairs 
@@ -80,7 +79,7 @@ class CordSearchQATool(TextSearchQATool):
             specialised for sequence classification
         
     Methods
-    _______
+    -------
     
         search
         refine_search
@@ -160,7 +159,7 @@ class CordSearchQATool(TextSearchQATool):
         
         
         Parameters
-        __________
+        ----------
         
             containing: list
                 list of regular expressions, appearances of which are counted 
@@ -177,9 +176,9 @@ class CordSearchQATool(TextSearchQATool):
                 `search[int]`
                 
         Returns
-        _______
+        -------
         
-        None -  Results are stored as a SearchResult object in the 
+        None -  Results are stored as a `SearchResult` object in the 
                 `search_results` attribute.
         
         """
@@ -221,7 +220,7 @@ class CordSearchQATool(TextSearchQATool):
         (the above will display the results of "search0" in the cell output)
         
         Parameters
-        __________
+        ----------
         
             search_name: str
                 A named search / key value from the `search_results` attribute
@@ -230,7 +229,7 @@ class CordSearchQATool(TextSearchQATool):
                 order as the items in the `texts` attribute
                 
         Returns
-        _______
+        -------
         
             Str: HTML of texts from the specified search
         
@@ -279,7 +278,7 @@ class CordSearchQATool(TextSearchQATool):
         (the above displays the results of the answer search in the cell output)
         
         Parameters
-        __________
+        ----------
         
              search_name: str
                  Key of search, texts from which will be used to generate 
@@ -298,7 +297,7 @@ class CordSearchQATool(TextSearchQATool):
                  Parameter used by the Roberta model to fix the input length
                 
         Returns
-        _______
+        -------
         
             tuple: (list: QA sentence scores, str: HTML) 
         
@@ -409,13 +408,13 @@ class CordSearchQATool(TextSearchQATool):
         in quick succession.
         
         Parameters
-        __________
+        ----------
         
              search_name: str
                  Key of search, from which any missing abstracts will be found
                 
         Returns
-        _______
+        -------
         
             None: abstracts are stored in the `texts` attribute
         

@@ -12,6 +12,63 @@ from transformers import RobertaForSequenceClassification, RobertaTokenizer
 
 
 class SearchResult:
+    """
+    Stores the search parameters and results of an individual search.
+    
+    To be used in conjunction with the `search` method of the 
+    `TextSearchQATool`. Each new call to `search` creates a new `SearchResult`,
+    that stores the search_name, the ids of the results, and the details of the
+    search parameters (containing, not_containing). Any calls to the 
+    `refine_search` method (of the QA tool) call the `update` method to add the 
+    details of the new `containing` / `not_containing`  parameters and update 
+    the `ids` attribute.
+    
+    Printing a search result returns a summary of the search info:
+    
+        ## SearchResult search0 ## - 1000 Results
+        ==================================================
+        2 Searches:
+        Original Search:
+            containing: ['this', 'and', 'that']
+            not containing: ['exclude', 'these', 'words']
+        Refined Search 1:
+            containing: ['more', 'results']
+            not containing: ['other', 'things']
+    
+    Parameters
+    ----------
+    
+        name: str
+            name given to search
+        ids: list
+            list of ids of the new search results
+        containing: list  
+            containing parameter used in new search
+        not_containing: list  
+            not_containing parameter used in new search
+            
+    Attributes
+    ----------
+        
+        name: str
+            name given to search
+        ids:
+            list of ids of the search results
+        search_no: int
+            the number of searches performed, counting the intial search and
+            any subsequent refined searches
+        containing: list
+            list of tuples: (search no, `containing` parameter of search)
+        not_containing: list
+            list of tuples: (search no, `not_containing` parameter of search)
+        
+        
+    Methods
+    -------
+    
+       update
+    
+    """
     def __init__(self, name, ids, containing=[], not_containing=[]):
         self.name = name
         self.ids = ids
@@ -27,6 +84,30 @@ class SearchResult:
 
 
     def update(self, ids, containing=[], not_containing=[]):
+        """
+        Update a `SearchResult` with details of new search.
+        
+        This method adds the results and the parameters used in
+        any call to the `refine_search` method of the `TextSearchQATool`.
+        
+        Parameters
+        ----------
+            ids: list
+                list of ids from refined search results
+            containing: list
+                list of regex terms used as the `containing` parameter of the
+                refined search
+            not_containing: list
+                list of regex terms used as the `not_containing` parameter of
+                the refined search
+        
+        
+        Returns
+        -------
+        
+        None - `ids`, `containing` and `not_containing` attributes are updated
+        
+        """
         self.ids = ids
         self.search_no += 1
         if containing:
@@ -36,9 +117,12 @@ class SearchResult:
 
 
     def __repr__(self):
-        repr_string = f"## SearchResult {self.name} ##\n"
-        repr_string += '=' * 50 + '\n'
-        repr_string += f"{self.search_no} Searches:\n"
+        """Return summary of `SearchResult` attributes"""
+        
+        repr_string = (f"## SearchResult {self.name} ## - " 
+                       f"{len(self.ids)} Results\n"
+                       + '=' * 50 + '\n'
+                       f"{self.search_no} Searches:\n")
         for i in range(self.search_no):
             if i == 0:
                 repr_string += "Original Search:\n"
@@ -55,6 +139,61 @@ class SearchResult:
 
 
 class TextSearchQATool:
+    """
+    Tool to find answers to questions in a corpus of text
+    
+    The search process is conducted in two stages: 
+    
+        1) Identify broad a subset of the corpus containing keywords 
+        relating to the intended question - the aim should be to include
+        all possible texts of interest, whilst eliminating any that
+        bear no relation to the intended question. 
+        
+        See methods: search, refine_search, return_html_search_results
+        
+        2) Search over the texts identified in stage 1  for answers to a 
+        specific research question. A Roberta-Tanda model generates scores 
+        for each sentence which are used to rank the most relevant sentences. 
+        
+        See methods: return_answers, return_html answers 
+    
+    Parameters
+    __________
+    
+        texts: dict
+            Dict of [id]:[text] pairings
+        qa_model_dir: str  
+            Location of the tanda model directory containing a pre-trained
+            model checkpoint
+            
+    Attributes
+    ___________
+
+        texts: dict  
+            Dict of [cord_uid]:[abstract] pairs 
+        search_results: dict
+            dict of [search_name]:[SearchResult] pairs. Uses the SearchResult
+            class defined in the text_search_qa_tool module 
+        tokenizer: RobertaTokenizer
+            Hugging face's Transformers implementation of the Bert tokenizer
+        device: torch.device
+            Device on which to mount model (CPU or GPU)
+        model: RobertaForSequenceClassification
+            Hugging Face's Transformers implementation of the Roberta model
+            specialised for sequence classification
+        
+    Methods
+    _______
+    
+        search
+        refine_search
+        return_html_search_results
+        clear_searches
+        return_answers
+        return_html_answers
+        
+    """
+
     def __init__(self, texts, qa_model_dir):
         print('=' * 100)
         print("Building Search tool")
@@ -64,6 +203,8 @@ class TextSearchQATool:
 
 
     def _init_qa_model_atts(self, qa_model_dir):
+        """Load model / tokenizer into memory and store as attributes"""
+        
         # Load pretrained tokenizer
         qa_model_dir += "/models/tanda_roberta_base_asnq/ckpt"
         if not os.path.exists(qa_model_dir):
@@ -92,6 +233,13 @@ class TextSearchQATool:
 
 
     def clear_searches(self):
+        """
+        Clears all searches from the `search_results` attribute
+        
+        Re-sets the `search_results` attribute to an empty dict. Takes no
+        arguments and returns nothing.
+        """
+        
         print(f"Clearing {len(self.search_results)} searches")
         self.search_results = {}
 
@@ -136,8 +284,8 @@ class TextSearchQATool:
         Returns
         _______
         
-        None -  Results are stored as a SearchResult object in the 
-                "search_results" attribute.
+        None -  Results are stored as a `SearchResult` object in the 
+                `search_results` attribute.
         
         """
         
@@ -201,6 +349,54 @@ class TextSearchQATool:
 
     def refine_search(self, search_name, containing=[], not_containing=[], 
                       containing_threshold=2):
+        """
+        Take the results of an existing search and refine them.
+        
+        This method has the same functionality as the `search` method, the 
+        difference being the corpus of text from which the results are token.
+        Where the search method searches over all of the texts contained in the
+        `texts` attribute, the `refine_search` searches over the results of a 
+        previous search. See `search` for further info.
+        
+        Tip: Printing the relevant `SearchResult` object stored in the 
+        `search_results` attribute will display a history of the search, 
+        including any refined searches, like so:
+        
+            >>> search_tool.search_results["search0"]
+
+            ## SearchResult search0 ## - 1000 Results
+            ==================================================
+            2 Searches:
+            Original Search:
+                containing: ['this', 'and', 'that']
+                not containing: ['exclude', 'these', 'words']
+            Refined Search 1:
+                containing: ['more', 'results']
+                not containing: ['other', 'things']
+                
+        Parameters
+        ----------
+        
+            search_name: str, optional
+                Name of search to be refined 
+            containing: list
+                list of regular expressions, appearances of which are counted 
+                for each text.
+            not_containing: list
+                list of regular expressions that are to be excluded from the 
+                search results. 
+            containing_threshold: int, default 2
+                the number of hits from the containing list required for a
+                text to be added to the results
+                
+        Returns
+        -------
+        
+        None -  Results are stored as in respective `SearchResult` object in the 
+                `search_results` attribute.
+        
+                
+        """
 
         # check for correct input
         if search_name not in self.search_results.keys():
@@ -253,6 +449,7 @@ class TextSearchQATool:
 
     def _search_by_texts_ids(self, search_texts_ids, containing, not_containing,
                              containing_threshold):
+        """Find texts with specified ids that contain / dont contain keywords"""
 
         output_ids = search_texts_ids
         if containing:
@@ -275,6 +472,40 @@ class TextSearchQATool:
 
     def return_answers(self, question, search_name=None, 
                        min_score=None, max_length=128):
+        """
+        Searches texts for sentences that answer a question.
+        
+        Texts from the results of a specified search (or the whole corpus if no
+        `search_name` is given) are split into sentences, and each sentence is
+        scored based on the likelihood it answers the `question` parameter 
+        provided - the higher the score, the more likely the sentence contains 
+        an answer to the given question. Results are returned as tuples in the
+        following format:
+        
+            (text id, sentence number, sentence text, score)
+            
+        Parameters
+        ----------
+            
+            question: str
+                Question against which sentences are scored
+            search_name: str, optional
+                Name of the search to take results from. If none, the whole
+                text corpus in the `texts` attribute is used
+            min_score: int, optional
+                The minimum score a sentence must receive to be returned in the
+                output
+            max_length: int, default 128
+                The length of a sentence in tokens used by the Bert model to
+                set the fixed-length input to the model
+            
+        Returns
+        -------
+        
+            tuple: (str: text_id, str: sentence no, 
+                    str: sentence text, float: score)
+        
+        """
 
         if not search_name is None:
             search_texts_ids = self.search_results[search_name].ids
@@ -430,7 +661,7 @@ class TextSearchQATool:
         (the above displays the results of the answer search in the cell output)
         
         Parameters
-        __________
+        ----------
         
              search_name: str
                  Key of search, texts from which will be used to generate 
@@ -449,7 +680,7 @@ class TextSearchQATool:
                  Parameter used by the Roberta model to fix the input length
                 
         Returns
-        _______
+        -------
         
             tuple: (list: QA sentence scores, str: HTML) 
         
@@ -513,7 +744,7 @@ class TextSearchQATool:
         (the above will display the results of "search0" in the cell output)
         
         Parameters
-        __________
+        ----------
         
             search_name: str
                 A named search / key value from the `search_results` attribute
@@ -522,7 +753,7 @@ class TextSearchQATool:
                 order as the items in the `texts` attribute
                 
         Returns
-        _______
+        -------
         
             Str: HTML of texts from the specified search
         

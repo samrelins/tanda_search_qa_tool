@@ -45,7 +45,7 @@ class CordResultSummarizer:
             journal in which the study was published
     
     Parameters
-    __________
+    ----------
     
         cord_uids: list 
             List of cord_uids identifying papers to be summarized
@@ -57,7 +57,7 @@ class CordResultSummarizer:
             Location of directory containing tanda model checkpoint 
     
     Attributes
-    ___________
+    ----------
 
         data_dir: str 
             Location of directory containing CORD-19 dataset
@@ -74,7 +74,7 @@ class CordResultSummarizer:
             specialised for sequence classification
         
     Methods
-    _______
+    -------
     
         summary_table
         
@@ -155,7 +155,7 @@ class CordResultSummarizer:
         of the summary table, and bulds a dataframe from the results.
         
         Parameters
-        __________
+        ----------
         
             n_hits: int, default 2
                 The number of mentions of a population in the paper text 
@@ -169,7 +169,7 @@ class CordResultSummarizer:
                 solution feature - search is conducted over the full paper text
                 
         Returns
-        _______
+        -------
         
             pandas.DataFrame containing the summary data
         
